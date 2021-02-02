@@ -8,6 +8,16 @@ import ChildLogin from './Components/ChildLogin';
 import ChildPage from './Components/ChildPage';
 //import Home from './Home';
 
+//firebaseの宣言
+import firebase from 'firebase/app';
+import firestore from 'firebase/firestore';
+import config from './Firebase/Config.js';
+
+//firebaseの初期設定
+firebase.initializeApp(config);
+const db = firebase.firestore();
+const collection = db.collection('users');
+
 class App extends Component {
   render() {
     return (
@@ -22,6 +32,7 @@ class App extends Component {
             <Route path='/ParentPage' component={ParentPage}/>
           </div>
         </Router>
+        {console.log(collection.get())}
       </div>
     );
   }

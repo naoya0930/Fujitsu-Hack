@@ -2,7 +2,6 @@ import React from 'react'
 import Button from '@material-ui/core/Button';
 import Createicon from '@material-ui/icons/Create';
 
-
 class About extends React.Component {
   render(){
     return(
