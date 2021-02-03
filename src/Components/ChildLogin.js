@@ -3,10 +3,8 @@ import Button from '@material-ui/core/Button';
 import './ChildLogin.css';
 import { BrowserRouter as Router, Route} from 'react-router-dom';
 import { withRouter } from 'react-router-dom'
-import { Link } from 'react-router-dom'
 import ChildPage from './ChildPage';
 import Container from '@material-ui/core/Container';
-
 
 class About extends React.Component {
   constructor(props) {
@@ -30,10 +28,6 @@ class About extends React.Component {
         pathname: '/ChildPage',
         state: {names: this.state.names}
         })
-        }
-  navigate() {
-        console.log(this.props.history);
-        this.props.history.push("/");
         }
   render(){
     return(
