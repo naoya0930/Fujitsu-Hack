@@ -7,6 +7,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { Link } from 'react-router-dom'
+import ParentLogin from './ParentLogin';
+import Container from '@material-ui/core/Container';
+
 
 var styles = ({
   div:{
@@ -65,12 +70,15 @@ var styles = ({
   },
 });
 
-
 class About extends React.Component {
   render(){
     return(
       <body>
       <div style={styles.div}>
+      <Link to="/ParentLogin"><Typography variant="h6" style={{margin:'auto',width:'250%',fontSize: "18px"}}>
+        ログインページにもどる
+      </Typography></Link>
+      <Route path='/ParentLogin' component={ParentLogin}/>
         <br/>
         <Select
           labelId="demo-simple-select-filled"
@@ -80,7 +88,7 @@ class About extends React.Component {
           variant="filled"
           style={styles.formControl}
           //onChange={handleChange}
-          
+
         >
           <MenuItem value="">
             <em>None</em>
@@ -98,7 +106,7 @@ class About extends React.Component {
           <p style={styles.classTime}>10:20~<br/>11:50</p>
         </Box>
         */}
-        
+
         <Card variant="elevation" color="#000000" style={styles.mainCard}>
           <CardContent >
             <Typography color="textSecondary" gutterBottom>

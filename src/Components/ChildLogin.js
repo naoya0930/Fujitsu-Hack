@@ -1,29 +1,55 @@
 import React from 'react'
 import Button from '@material-ui/core/Button';
 import './ChildLogin.css';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { Link } from 'react-router-dom'
+import ChildPage from './ChildPage';
+import Container from '@material-ui/core/Container';
+
 
 class About extends React.Component {
+  constructor(props) {
+        super(props);
+        this.state = {names:null, password:null,Login:null}
+        this.handleChange = this.handleChange.bind(this)
+        this.handleClick = this.handleClick.bind(this)
+        }
+  handleChange (e) {
+        let name = e.target.name; // フォームのname属性を取得
+        this.setState({[name]: e.target.value}) // name属性 = stateのkey名なのでstateに保存
+          // name属性 = stateのkey名なのでstateに保存
+        }
+  handleClick(e){
+        this.setState({Login:'ログイン失敗'})
+         // name属性 = stateのkey名なのでstateに保存
+        }
   render(){
     return(
       <div class="form-wrapper">
-        <h1>ログインページ</h1>
-  <form>
-    
+        <Container maxwidth="xl"><h1>子供ログインページ</h1></Container>
+        <form>
+
     <div class="form-item">
     <h3>名前</h3>
       <label for="name"></label>
-      <input type="name" name="name" required="required" placeholder="名前"></input>
+      <input type="name" name="names" required="required" placeholder="名前" value={this.state.names}
+        onChange={this.handleChange}></input>
     </div>
     <div class="form-item">
     <h3>パスワード</h3>
       <label for="password"></label>
-      <input type="password" name="password" required="required" placeholder="パスワード"></input>
+      <input type="password" name="password" required="required" placeholder="パスワード" value={this.state.password}
+        onChange={this.handleChange}></input>
     </div>
-  
-      <Button variant="contained" color="primary">サインイン</Button>
-  </form>
-</div>
-    )
+    {this.state.names===this.state.password ?
+      <Link to="/ChildPage"><Button variant="contained" color="primary">サインイン</Button></Link>:<Button variant="contained" color="primary" onClick={this.handleClick}>サインイン</Button>}
+    <Route path='/ChildPage'component={ChildPage}/>
+    <div class="form-item">
+    <h3>{this.state.Login}</h3>
+    </div>
+    </form>
+    </div>
+  );
   }
 }
 
