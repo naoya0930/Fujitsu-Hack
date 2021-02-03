@@ -15,7 +15,6 @@ class App extends Component {
         <Router>
           <div>
             <Navbar /><hr/>
-            <Route path='/' component={About}/>
             <Route path='/About' component={About}/>
             <Route path='/ChildPage' component={ChildPage}/>
             <Route path='/ChildLogin' component={ChildLogin}/>
