@@ -6,6 +6,7 @@ import ParentLogin from './Components/ParentLogin';
 import ParentPage from './Components/ParentPage';
 import ChildLogin from './Components/ChildLogin';
 import ChildPage from './Components/ChildPage';
+import TeacherPage from './Components/TeacherPage';
 //import Home from './Home';
 
 class App extends Component {
@@ -20,6 +21,7 @@ class App extends Component {
             <Route path='/ChildLogin' component={ChildLogin}/>
             <Route path='/ParentLogin' component={ParentLogin}/>
             <Route path='/ParentPage' component={ParentPage}/>
+            <Route path='/TeacherPage' component={TeacherPage}/>
           </div>
         </Router>
       </div>
