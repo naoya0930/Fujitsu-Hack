@@ -1,5 +1,5 @@
 import React from 'react'
-import {useState, useCallback } from 'react'
+import {useState} from 'react'
 import Button from '@material-ui/core/Button'
 import { makeStyles } from '@material-ui/core/styles';
 import { styled } from '@material-ui/core/styles';
@@ -19,6 +19,9 @@ import Menu from '@material-ui/core/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import Table from '@material-ui/core/Table';
 import { DataGrid, ColDef, ValueGetterParams } from '@material-ui/data-grid';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { Link } from 'react-router-dom'
+import ChildLogin from './ChildLogin';
 
 const classes = makeStyles((theme) => ({
   root: {
@@ -69,6 +72,12 @@ function MenuAppBar() {
           <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "24px"}}>
             ユーザーID:0000067
           </Typography>
+          <Link to="/ChildLogin"><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "24px"}}>
+            ログインページにもどる
+          </Typography></Link>
+          <Route path='/ChildLogin' component={ChildLogin}/>
+
+
           {auth && (
             <div>
               <IconButton aria-label="account of current user" aria-controls="menu-appbar"aria-haspopup="true"onClick={handleMenu}color="inherit">
@@ -140,6 +149,10 @@ class About extends React.Component {
   render(){
     return(
       <div>
+      <Link to="/ChildLogin"><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
+        ログインページにもどる
+      </Typography></Link>
+      <Route path='/ChildLogin' component={ChildLogin}/>
       <MenuAppBar/>
         <CssBaseline/><Container><Button variant="contained" style={{margin:'auto',width:'100%',fontSize: "40px"}}>
          <h0>授業履修状況</h0></Button></Container>
