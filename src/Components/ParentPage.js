@@ -71,14 +71,17 @@ var styles = ({
 });
 
 class About extends React.Component {
+  constructor(props) {
+        super(props);
+        this.state = {names2:null}
+        }
   render(){
     return(
       <body>
       <div style={styles.div}>
       <Link to="/ParentLogin"><Typography variant="h6" style={{margin:'auto',width:'250%',fontSize: "18px"}}>
-        ログインページにもどる
+        ログインページにもどる{this.props.location.state.names2}
       </Typography></Link>
-      <Route path='/ParentLogin' component={ParentLogin}/>
         <br/>
         <Select
           labelId="demo-simple-select-filled"
@@ -88,7 +91,6 @@ class About extends React.Component {
           variant="filled"
           style={styles.formControl}
           //onChange={handleChange}
-
         >
           <MenuItem value="">
             <em>None</em>

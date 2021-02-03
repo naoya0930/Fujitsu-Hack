@@ -22,6 +22,7 @@ import { DataGrid, ColDef, ValueGetterParams } from '@material-ui/data-grid';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import ChildLogin from './ChildLogin';
+import { withRouter } from 'react-router-dom'
 
 const classes = makeStyles((theme) => ({
   root: {
@@ -67,14 +68,11 @@ function MenuAppBar() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'100%',fontSize: "24px"}}>
-            名前：原祥太
+            名前:
           </Typography>
           <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "24px"}}>
-            ユーザーID:0000067
+            パスワード:
           </Typography>
-          <Link to="/ChildLogin"><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "24px"}}>
-            ログインページにもどる
-          </Typography></Link>
           <Route path='/ChildLogin' component={ChildLogin}/>
 
 
@@ -146,13 +144,16 @@ function Tab() {
   );
 }
 class About extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {names:null}
+    }
   render(){
     return(
       <div>
       <Link to="/ChildLogin"><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
-        ログインページにもどる
+        ログインページにもどる:{this.props.location.state.names}
       </Typography></Link>
-      <Route path='/ChildLogin' component={ChildLogin}/>
       <MenuAppBar/>
         <CssBaseline/><Container><Button variant="contained" style={{margin:'auto',width:'100%',fontSize: "40px"}}>
          <h0>授業履修状況</h0></Button></Container>
@@ -162,4 +163,4 @@ class About extends React.Component {
   }
 }
 
-export default About;
+export default withRouter(About);
