@@ -10,7 +10,6 @@ import Typography from '@material-ui/core/Typography';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import ParentLogin from './ParentLogin';
-
 import {PieChart, Pie, Cell} from 'recharts';
 
 var styles = ({

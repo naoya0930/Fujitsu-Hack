@@ -65,7 +65,6 @@ var styles = ({
   },
 });
 
-
 class About extends React.Component {
   render(){
     return(
@@ -80,7 +79,7 @@ class About extends React.Component {
           variant="filled"
           style={styles.formControl}
           //onChange={handleChange}
-          
+
         >
           <MenuItem value="">
             <em>None</em>
@@ -98,7 +97,7 @@ class About extends React.Component {
           <p style={styles.classTime}>10:20~<br/>11:50</p>
         </Box>
         */}
-        
+
         <Card variant="elevation" color="#000000" style={styles.mainCard}>
           <CardContent >
             <Typography color="textSecondary" gutterBottom>
