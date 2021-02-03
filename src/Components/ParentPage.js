@@ -8,6 +8,8 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 
+import {PieChart, Pie, Cell} from 'recharts';
+
 var styles = ({
   div:{
     margin: 10,
@@ -63,11 +65,83 @@ var styles = ({
     alignItems: "center",
     minWidth: 150,
   },
+  statisticsCard:{
+    marginBottom: 5,
+    borderWidth: 3,
+    borderColor: "#00A0A0",
+    display: 'flex',
+    alignItems: "center",
+  },
 });
+
+function DrawGraph(data, colors)
+{
+  let sum = 0;
+  data.map((entry, index) => {
+    sum += entry.value;
+  })
+
+  return (
+    <PieChart width={250} height={250}>
+      {/*}<text x={"50%"} y={"50%"} textAnchor="middle">{"50%"}</text>{/**/}
+      
+      <text  x={"50%"} y={"52%"} fontSize={20} fontwewight={600} textAnchor="middle">
+      {Math.round(100*data[0].value/sum)} %
+      </text>
+      <Pie data={data}
+       cx="50%" cy="50%"
+       innerRadius={45} 
+       outerRadius={80} 
+       activeIndex={0}
+       startAngle={90}
+       endAngle={90-360}
+       >
+        {
+          data.map((entry, index) => (
+            <Cell key={entry.name} fill={colors[index]} label={{position: 'inside'}} />
+          ))
+        }
+      </Pie>
+    </PieChart>
+  );
+};
 
 
 class About extends React.Component {
   render(){
+    const Concentration_Time = [
+      {
+        "name": "True",
+        "value": 400
+      },
+      {
+        "name": "False",
+        "value": 300
+      },
+    ]
+    const Gaze_Time = [
+      {
+        "name": "True",
+        "value": 200
+      },
+      {
+        "name": "False",
+        "value": 500
+      },
+    ]
+    const Active_Time = [
+      {
+        "name": "True",
+        "value": 500
+      },
+      {
+        "name": "False",
+        "value": 200
+      },
+    ]
+
+    const colors = ["#00FF00", "#0000FF"]
+
     return(
       <body>
       <div style={styles.div}>
@@ -145,12 +219,38 @@ class About extends React.Component {
             </p>
           </CardContent>
         </Card>
-        <Card variant="elevation" color="#000000" style={styles.mainCard}>
-          <CardContent >
+
+        <Card variant="elevation" color="#000000" >
+          <CardContent>
             <Typography color="textSecondary" gutterBottom>
               統計
             </Typography>
-            統計グラフがここに入る
+          </CardContent>
+          <CardContent style={styles.statisticsCard}>
+            <Card variant="elevation" color="#000000" style={styles.classPast}>
+              <CardContent >
+                <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
+                  集中度
+                </Typography>
+                {DrawGraph(Concentration_Time, colors)}
+              </CardContent>
+            </Card>
+            <Card variant="elevation" color="#000000" style={styles.classPast}>
+              <CardContent >
+                <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
+                注視度
+                </Typography>
+                {DrawGraph(Gaze_Time, colors)}
+              </CardContent>
+            </Card>
+            <Card variant="elevation" color="#000000" style={styles.classPast}>
+              <CardContent >
+                <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
+                アクティブ度
+                </Typography>
+                {DrawGraph(Active_Time, colors)}
+              </CardContent>
+            </Card>
           </CardContent>
         </Card>
       </div>
