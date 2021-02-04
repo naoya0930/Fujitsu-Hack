@@ -11,8 +11,7 @@ import TeacherLogin from './Components/TeacherLogin';
 import Movie from './Components/Movie';
 //import Home from './Home';
 //const YOUTUBE_API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY;
-class App extends Component {
-  render() {
+const App = () => {
     return (
       <div className="App">
         <Router>
