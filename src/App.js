@@ -7,8 +7,10 @@ import ParentPage from './Components/ParentPage';
 import ChildLogin from './Components/ChildLogin';
 import ChildPage from './Components/ChildPage';
 import TeacherPage from './Components/TeacherPage';
+import TeacherLogin from './Components/TeacherLogin';
+import Movie from './Components/Movie';
 //import Home from './Home';
-
+//const YOUTUBE_API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY;
 class App extends Component {
   render() {
     return (
@@ -22,6 +24,8 @@ class App extends Component {
             <Route path='/ParentLogin' component={ParentLogin}/>
             <Route path='/ParentPage' component={ParentPage}/>
             <Route path='/TeacherPage' component={TeacherPage}/>
+            <Route path='/TeacherLogin' component={TeacherLogin}/>
+            <Route path='/Movie' component={Movie}/>
           </div>
         </Router>
       </div>

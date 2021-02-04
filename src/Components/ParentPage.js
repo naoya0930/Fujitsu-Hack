@@ -10,9 +10,6 @@ import Typography from '@material-ui/core/Typography';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import ParentLogin from './ParentLogin';
-import Container from '@material-ui/core/Container';
-
-
 import {PieChart, Pie, Cell} from 'recharts';
 
 var styles = ({
@@ -89,14 +86,14 @@ function DrawGraph(data, colors)
   return (
     <PieChart width={250} height={250}>
       {/*}<text x={"50%"} y={"50%"} textAnchor="middle">{"50%"}</text>{/**/}
-      
+
       <text  x={"50%"} y={"52%"} fontSize={20} fontwewight={600} textAnchor="middle">
       {Math.round(100*data[0].value/sum)} %
       </text>
       <Pie data={data}
        cx="50%" cy="50%"
-       innerRadius={45} 
-       outerRadius={80} 
+       innerRadius={45}
+       outerRadius={80}
        activeIndex={0}
        startAngle={90}
        endAngle={90-360}
@@ -113,6 +110,10 @@ function DrawGraph(data, colors)
 
 
 class About extends React.Component {
+  constructor(props) {
+        super(props);
+        this.state = {names2:null}
+        }
   render(){
     const Concentration_Time = [
       {
@@ -153,7 +154,6 @@ class About extends React.Component {
       <Link to="/ParentLogin"><Typography variant="h6" style={{margin:'auto',width:'250%',fontSize: "18px"}}>
         ログインページにもどる
       </Typography></Link>
-      <Route path='/ParentLogin' component={ParentLogin}/>
         <br/>
         <Select
           labelId="demo-simple-select-filled"
@@ -163,7 +163,6 @@ class About extends React.Component {
           variant="filled"
           style={styles.formControl}
           //onChange={handleChange}
-
         >
           <MenuItem value="">
             <em>None</em>
