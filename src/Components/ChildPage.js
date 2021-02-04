@@ -114,7 +114,7 @@ const headCells = [
   { id: 'id', numeric: false, disablePadding: true, label: '授業ID' },
   { id: 'classname', numeric: true, disablePadding: false, label: '授業名' },
   { id: 'subject', numeric: true, disablePadding: false, label: '教科' },
-  { id: 'url', numeric: true, disablePadding: false, label: '授業URL' },
+  { id: 'url', numeric: false, disablePadding: false, label: '授業URL' },
   { id: 'status', numeric: true, disablePadding: false, label: '履修状況' },
 ];
 
@@ -207,7 +207,7 @@ const EnhancedTableToolbar = (props) => {
         </Typography>
       ) : (
         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          Nutrition
+          授業を受けよう
         </Typography>
       )}
 
@@ -511,7 +511,7 @@ class About extends React.Component {
   render(){
     return(
       <div>
-      <Link to="/Movie"><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
+      <Link to="/ChildLogin"><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
         ログインページにもどる
       </Typography></Link>
       <MenuAppBar/>
