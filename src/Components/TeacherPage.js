@@ -79,6 +79,7 @@ var styles = ({
   },
 });
 
+<<<<<<< HEAD
 function DrawGraph(data, colors)
 {
   let sum = 0;
@@ -112,6 +113,8 @@ function DrawGraph(data, colors)
 };
 
 
+=======
+>>>>>>> 7aebad790c824f6512128480d65b52283c140cb4
 class About extends React.Component {
   render(){
     const Concentration_Time = [
