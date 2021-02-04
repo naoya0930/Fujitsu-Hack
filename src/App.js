@@ -7,6 +7,7 @@ import ParentPage from './Components/ParentPage';
 import ChildLogin from './Components/ChildLogin';
 import ChildPage from './Components/ChildPage';
 import TeacherPage from './Components/TeacherPage';
+import LookatCV from './Components/LookatCV';
 //import Home from './Home';
 
 class App extends Component {
@@ -22,6 +23,7 @@ class App extends Component {
             <Route path='/ParentLogin' component={ParentLogin}/>
             <Route path='/ParentPage' component={ParentPage}/>
             <Route path='/TeacherPage' component={TeacherPage}/>
+            <Route path='/LookatCV' component={LookatCV}/>
           </div>
         </Router>
       </div>
