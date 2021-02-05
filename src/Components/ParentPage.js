@@ -6,11 +6,14 @@ import MenuItem from '@material-ui/core/MenuItem';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import ParentLogin from './ParentLogin';
 import {PieChart, Pie, Cell} from 'recharts';
+
+import { firestorage } from '../lib/firebase.js';
 
 var styles = ({
   div:{
@@ -30,6 +33,7 @@ var styles = ({
     marginTop: 5,
     marginBottom: 5,
     borderWidth: 2,
+    width: '100%',
   },
   statusText:{
     fontWeight: 600,
@@ -108,6 +112,21 @@ function DrawGraph(data, colors){
   );
 };
 
+function requestChildImage(){
+  var storageRef = firestorage.ref();
+  var img = document.getElementById('childimage');
+  img.hidden = !img.hidden;
+
+  storageRef.child('mountains.jpg').getDownloadURL().then(function(url){
+    img.src = url;
+  }).catch( function (error) {
+    console.log("Firestorage Image GET and Show : " + error.message)
+    //強制非表示
+    img.hidden = false;
+    img.src = "";
+  }); 
+}
+
 class About extends React.Component {
   constructor(props) {
         super(props);
@@ -170,9 +189,12 @@ class About extends React.Component {
           <MenuItem value={20}>Twenty</MenuItem>
           <MenuItem value={30}>Thirty</MenuItem>
         </Select>
-        <p class="alert alert-danger" style={styles.status}>
+        <Button class="alert alert-danger" style={styles.status} onClick={requestChildImage}>
           <h2 style={styles.statusText}><Createicon/>授業中</h2>
-        </p>
+        </Button>
+        <Card variant="elevation" style={styles.mainCard}>
+          <CardMedia component="img" id="childimage" hidden></CardMedia>
+        </Card>
         {/*
         <Box class="border rounded" style={styles.classNow}>
           <h2 style={styles.classText}>数学</h2>
@@ -180,7 +202,7 @@ class About extends React.Component {
         </Box>
         */}
 
-        <Card variant="elevation" color="#000000" style={styles.mainCard}>
+        <Card variant="elevation" style={styles.mainCard}>
           <CardContent >
             <Typography color="textSecondary" gutterBottom>
               授業中の科目
