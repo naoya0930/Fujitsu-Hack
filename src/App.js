@@ -6,6 +6,8 @@ import ParentLogin from './Components/ParentLogin';
 import ParentPage from './Components/ParentPage';
 import ChildLogin from './Components/ChildLogin';
 import ChildPage from './Components/ChildPage';
+import TeacherPage from './Components/TeacherPage';
+import TeacherLogin from './Components/TeacherLogin';
 
 //import Home from './Home';
 
@@ -20,6 +22,8 @@ const App = () => {
               <Route path='/ChildLogin' component={ChildLogin}/>
               <Route path='/ParentLogin' component={ParentLogin}/>
               <Route path='/ParentPage' component={ParentPage}/>
+              <Route path= '/TeacherPage' component={TeacherPage}/>
+              <Route path= '/TeacherLogin' component={TeacherLogin}/>
             </div>
           </Router>
         </div>
