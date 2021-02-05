@@ -26,15 +26,14 @@ class AppMovie extends Component {
   constructor(props) {
     super(props);
     this.u = "https://www.youtube.com/embed/"
-    this.full_url = this.u+this.props.location.state.url.slice(17)
-    this.startTime = 0
-    this.endTime = 0
+    this.full_url = this.u+this.props.location.state.url.slice(17)+"?autoplay=1&mute=1"
+    this.startTime = null
+    this.endTime = null
     this.elapsedTime = null
     this.state = {
       nowTime: '状態：アクティブかどうか判定します'
     };
   }
-
 
   getTime(timelag = 0) {
     let japanTime = new Date().getTime()
@@ -53,23 +52,35 @@ class AppMovie extends Component {
     const time = `${year}年 ${month}月 ${date}日 ${hours}:${minutes}:${seconds}`
     return time
     }
+  winFocus(){
+          window.focus();
+      }
+  componentWillMount(){
+    window.addEventListener("blur", this.onblur,false)
+    function winFocus(){
+            window.focus();}
+    /* ウィンドウの読み込み完了時 */
+    window.onload=winFocus;
+    /* ウィンドウからフォーカスが外れた時 */
+    window.onblur=winFocus;
+  }
   componentDidMount(){
-    window.addEventListener("blur", this.onblur)
+    window.addEventListener("focus", this.onFocus,false)
   }
-  componentWillMount() {
-    window.addEventListener("focus", this.onFocus)
-  }
-  onFocus = () => {
+
+  onFocus = (event) => {
     console.log("アクティぶ")
     this.endTime = Date.now();
     this.elapsedTime += (this.endTime-this.startTime)
+    window.focus()
     this.setState({
       nowTime:this.getTime(0)+"  状態：アクティブです"
       });
   }
 
-  onblur = () => {
+  onblur = (event) => {
     console.log("非アクティぶ")
+    window.focus()
     this.setState({
         nowTime: this.getTime(0)+"  状態：非アクティブです"
          // 開始時
@@ -115,11 +126,8 @@ class AppMovie extends Component {
         日時:{this.state.nowTime}　非アクティブだった合計時間(秒){this.elapsedTime/1000}
       </Typography>
       <CssBaseline/><Container>
-        <iframe width="800" height="600" src={this.full_url} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+        <iframe width="800" height="600" loading = "lazy" src={this.full_url} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
         </iframe></Container>
-        <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
-          日時:{this.state.nowTime}　非アクティブだった合計時間(秒){this.elapsedTime/1000}
-        </Typography>
         </div>
     );
   }
