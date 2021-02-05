@@ -12,6 +12,21 @@ import Movie from './Components/Movie';
 //import Home from './Home';
 //const YOUTUBE_API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY;
 const App = () => {
+  Notification.requestPermission().then((permission) => {
+      switch (permission) {
+          case 'granted':
+// 許可された場合
+          break;
+          case 'denied':
+// ブロックされた場合
+          break;
+          case 'default':
+// 無視された場合
+          break;
+          default:
+          break;
+          }
+          });
     return (
       <div className="App">
         <Router>

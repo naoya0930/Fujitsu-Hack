@@ -60,6 +60,7 @@ class AppMovie extends Component {
     window.addEventListener("focus", this.onFocus)
   }
   onFocus = () => {
+    console.log("アクティぶ")
     this.endTime = Date.now();
     this.elapsedTime += (this.endTime-this.startTime)
     this.setState({
@@ -68,6 +69,7 @@ class AppMovie extends Component {
   }
 
   onblur = () => {
+    console.log("非アクティぶ")
     this.setState({
         nowTime: this.getTime(0)+"  状態：非アクティブです"
          // 開始時
@@ -92,12 +94,26 @@ class AppMovie extends Component {
     //window.addEventListener('focus', play);
     // ウィンドウからフォーカスが外れたら指定した関数を実行
     //window.addEventListener('blur', pause);
+    const push_tag = (event) => {
+      const title    = 'お子さんが授業を終了しました';
+      const options  = {
+        body : 'お子さんが{授業名}の終了を始めました',
+        icon : 'アイコン画像のパス',
+        data : {foo : '任意のデータ'}
+        };
+      const notification = new Notification(title, options);
+      notification.addEventListener('click', (event) => {
+      console.dir(event);}, false);
+      };
 
     return (
       <div>
-      <Link to="/ChildPage"><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
+      <Link to="/ChildPage" onClick={push_tag}><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
         戻る
       </Typography></Link>
+      <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
+        日時:{this.state.nowTime}　非アクティブだった合計時間(秒){this.elapsedTime/1000}
+      </Typography>
       <CssBaseline/><Container>
         <iframe width="800" height="600" src={this.full_url} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
         </iframe></Container>
