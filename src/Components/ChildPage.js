@@ -317,6 +317,18 @@ function EnhancedTable() {
 
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
+  const push_tag = (event) => {
+    const title    = 'お子さんが授業を開始しました';
+    const options  = {
+      body : 'お子さんが{授業名}の受講を始めました',
+      icon : 'アイコン画像のパス',
+      data : {foo : '任意のデータ'}
+      };
+    const notification = new Notification(title, options);
+    notification.addEventListener('click', (event) => {
+    console.dir(event);}, false);
+    };
+
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   return (
@@ -371,7 +383,7 @@ function EnhancedTable() {
                       pathname: '/Movie',
                       state: {url:row.url},
                       }}>
-                      <TableCell align="right">{row.url}</TableCell></Link>
+                      <TableCell align="right" onClick={push_tag}>{row.url}</TableCell></Link>
                       <TableCell align="right">{row.status}</TableCell>
                     </TableRow>
                   );

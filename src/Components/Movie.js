@@ -73,9 +73,9 @@ class AppMovie extends Component {
   constructor(props) {
     super(props);
     this.u = "https://www.youtube.com/embed/"
-    this.full_url = this.u+this.props.location.state.url.slice(17)
-    this.startTime = 0
-    this.endTime = 0
+    this.full_url = this.u+this.props.location.state.url.slice(17)+"?autoplay=1&mute=1"
+    this.startTime = null
+    this.endTime = null
     this.elapsedTime = null
     this.state = {
       nowTime: '状態：アクティブかどうか判定します'
@@ -101,24 +101,36 @@ class AppMovie extends Component {
 
     const time = `${year}年 ${month}月 ${date}日 ${hours}:${minutes}:${seconds}`
     return time
+    }
+  winFocus(){
+          window.focus();
+      }
+  componentWillMount(){
+    window.addEventListener("blur", this.onblur,false)
+    function winFocus(){
+            window.focus();}
+    /* ウィンドウの読み込み完了時 */
+    window.onload=winFocus;
+    /* ウィンドウからフォーカスが外れた時 */
+    window.onblur=winFocus;
+  }
+  componentDidMount(){
+    window.addEventListener("focus", this.onFocus,false)
   }
 
-  componentDidMount(){
-    window.addEventListener("blur", this.onblur)
-    setupcamera();
-  }
-  componentWillMount() {
-    window.addEventListener("focus", this.onFocus)
-  }
-  onFocus = () => {
+  onFocus = (event) => {
+    console.log("アクティぶ")
     this.endTime = Date.now();
     this.elapsedTime += (this.endTime-this.startTime)
+    window.focus()
     this.setState({
       nowTime:this.getTime(0)+"  状態：アクティブです"
       });
   }
 
-  onblur = () => {
+  onblur = (event) => {
+    console.log("非アクティぶ")
+    window.focus()
     this.setState({
         nowTime: this.getTime(0)+"  状態：非アクティブです"
          // 開始時
@@ -143,18 +155,29 @@ class AppMovie extends Component {
     //window.addEventListener('focus', play);
     // ウィンドウからフォーカスが外れたら指定した関数を実行
     //window.addEventListener('blur', pause);
+    const push_tag = (event) => {
+      const title    = 'お子さんが授業を終了しました';
+      const options  = {
+        body : 'お子さんが{授業名}の終了を始めました',
+        icon : 'アイコン画像のパス',
+        data : {foo : '任意のデータ'}
+        };
+      const notification = new Notification(title, options);
+      notification.addEventListener('click', (event) => {
+      console.dir(event);}, false);
+      };
 
     return (
       <div>
-      <Link to="/ChildPage"><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
+      <Link to="/ChildPage" onClick={push_tag}><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
         戻る
       </Typography></Link>
+      <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
+        日時:{this.state.nowTime}　非アクティブだった合計時間(秒){this.elapsedTime/1000}
+      </Typography>
       <CssBaseline/><Container>
-        <iframe width="800" height="600" src={this.full_url} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+        <iframe width="800" height="600" loading = "lazy" src={this.full_url} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
         </iframe></Container>
-        <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
-          日時:{this.state.nowTime}　非アクティブだった合計時間(秒){this.elapsedTime/1000}
-        </Typography>
         <video id="webcam" hidden></video>
         <canvas id="snapshot" hidden></canvas>
         </div>
