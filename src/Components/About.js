@@ -15,7 +15,7 @@ const About = () => {
      //ライフサイクルが遷移するたびに呼ばれる
       useEffect(() => {
         firestore.collection('users').onSnapshot((collection) => {
-            const data = collection.docs.map(doc => doc.data());
+            const data = collection.docs.map(item => item.data());
             setUsers(data);
         })
       }, [])

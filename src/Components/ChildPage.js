@@ -86,6 +86,14 @@ const rows = [
   createData(24,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
 ];
 
+const headCells = [
+  { id: 'id', numeric: false, disablePadding: true, label: '授業ID' },
+  { id: 'classname', numeric: true, disablePadding: false, label: '授業名' },
+  { id: 'subject', numeric: true, disablePadding: false, label: '教科' },
+  { id: 'url', numeric: false, disablePadding: false, label: '授業URL' },
+  { id: 'status', numeric: true, disablePadding: false, label: '履修状況' },
+];
+
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
     return -1;
@@ -111,14 +119,6 @@ function stableSort(array, comparator) {
   });
   return stabilizedThis.map((el) => el[0]);
 }
-
-const headCells = [
-  { id: 'id', numeric: false, disablePadding: true, label: '授業ID' },
-  { id: 'classname', numeric: true, disablePadding: false, label: '授業名' },
-  { id: 'subject', numeric: true, disablePadding: false, label: '教科' },
-  { id: 'url', numeric: false, disablePadding: false, label: '授業URL' },
-  { id: 'status', numeric: true, disablePadding: false, label: '履修状況' },
-];
 
 function EnhancedTableHead(props) {
   const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
