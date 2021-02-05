@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@jswf/react": "^1.0.33",
     "@material-ui/core": "^4.11.3",
     "@material-ui/data-grid": "^4.0.0-alpha.18",
     "@material-ui/icons": "^4.11.2",
