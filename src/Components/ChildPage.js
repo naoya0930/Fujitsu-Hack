@@ -4,7 +4,7 @@ import Button from '@material-ui/core/Button'
 import { styled } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
-import Grid from '@material-ui/core/Grid';
+//import Grid from '@material-ui/core/Grid';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -16,6 +16,8 @@ import FormGroup from '@material-ui/core/FormGroup';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
+//import Table from '@material-ui/core/Table';
+//import { DataGrid, ColDef, ValueGetterParams } from '@material-ui/data-grid';
 import Table from '@material-ui/core/Table';
 import { DataGrid, ColDef} from '@material-ui/data-grid';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
@@ -516,6 +518,7 @@ class About extends React.Component {
       </Typography></Link>
       <MenuAppBar/>
         <CssBaseline/><Container><Button variant="contained" style={{margin:'auto',width:'100%',fontSize: "40px"}}>
+
          <h0>授業履修状況</h0></Button></Container>
           <CssBaseline/><Container><EnhancedTable/></Container>
       </div>

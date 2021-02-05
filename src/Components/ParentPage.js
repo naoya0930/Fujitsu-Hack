@@ -76,6 +76,7 @@ var styles = ({
   },
 });
 
+
 function DrawGraph(data, colors){
   let sum = 0;
   data.map((entry, index) => {
