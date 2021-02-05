@@ -76,8 +76,7 @@ var styles = ({
   },
 });
 
-function DrawGraph(data, colors)
-{
+function DrawGraph(data, colors){
   let sum = 0;
   data.map((entry, index) => {
     sum += entry.value;
@@ -107,7 +106,6 @@ function DrawGraph(data, colors)
     </PieChart>
   );
 };
-
 
 class About extends React.Component {
   constructor(props) {
@@ -266,6 +264,5 @@ class About extends React.Component {
     )
   }
 }
-
 
 export default About;
