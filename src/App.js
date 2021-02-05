@@ -6,36 +6,24 @@ import ParentLogin from './Components/ParentLogin';
 import ParentPage from './Components/ParentPage';
 import ChildLogin from './Components/ChildLogin';
 import ChildPage from './Components/ChildPage';
+
 //import Home from './Home';
 
-//firebaseの宣言
-import firebase from 'firebase/app';
-import firestore from 'firebase/firestore';
-import config from './Firebase/Config.js';
-
-//firebaseの初期設定
-firebase.initializeApp(config);
-const db = firebase.firestore();
-const collection = db.collection('users');
-
-class App extends Component {
-  render() {
+const App = () => {
     return (
-      <div className="App">
-        <Router>
-          <div>
-            <Navbar /><hr/>
-            <Route path='/About' component={About}/>
-            <Route path='/ChildPage' component={ChildPage}/>
-            <Route path='/ChildLogin' component={ChildLogin}/>
-            <Route path='/ParentLogin' component={ParentLogin}/>
-            <Route path='/ParentPage' component={ParentPage}/>
-          </div>
-        </Router>
-        {console.log(collection.get())}
-      </div>
-    );
-  }
+        <div className="App">
+          <Router>
+            <div>
+              <Navbar /><hr/>
+              <Route path='/About' component={About}/>
+              <Route path='/ChildPage' component={ChildPage}/>
+              <Route path='/ChildLogin' component={ChildLogin}/>
+              <Route path='/ParentLogin' component={ParentLogin}/>
+              <Route path='/ParentPage' component={ParentPage}/>
+            </div>
+          </Router>
+        </div>
+      );
 }
 
 

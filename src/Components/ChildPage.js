@@ -142,7 +142,7 @@ class About extends React.Component {
       <div>
       <MenuAppBar/>
         <CssBaseline/><Container><Button variant="contained" style={{margin:'auto',width:'100%',fontSize: "40px"}}>
-         <h0>授業履修状況</h0></Button></Container>
+         <h1>授業履修状況</h1></Button></Container>
           <CssBaseline/><Container><Tab/></Container>
       </div>
       )
