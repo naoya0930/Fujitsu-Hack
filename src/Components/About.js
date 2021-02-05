@@ -4,7 +4,17 @@ import { storage } from '../lib/firebase.js';
 const About = () => {
     // this.state.users これと同じ
     const [users, setUsers] = useState([])
+    const title    = 'Aboutページが開かれました';
+    const options  = {
+      body : 'Aboutページ',
+      icon : 'アイコン画像のパス',
+      data : {foo : '任意のデータ'}
+      };
 
+    const notification = new Notification(title, options);
+    notification.addEventListener('click', (event) => {
+    console.dir(event);
+      }, false);
     const addUser = (index) => {
         firestore.collection('users').add({
            age: `${index}`,
@@ -37,6 +47,5 @@ const About = () => {
         </div>
       )
 }
-
 
 export default About;
