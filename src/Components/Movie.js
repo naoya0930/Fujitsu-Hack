@@ -116,6 +116,7 @@ class AppMovie extends Component {
   }
   componentDidMount(){
     window.addEventListener("focus", this.onFocus,false)
+    setupcamera();
   }
 
   onFocus = (event) => {
