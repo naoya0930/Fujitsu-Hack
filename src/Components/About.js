@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react'
-
 import { firestore } from '../lib/firebase.js';
 
 const About = () => {
