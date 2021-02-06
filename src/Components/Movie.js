@@ -7,6 +7,8 @@ import { Link } from 'react-router-dom'
 import Typography from '@material-ui/core/Typography';
 import { createStyles, lighten, makeStyles, Theme } from '@material-ui/core/styles';
 
+//import { firestorage } from '../lib/firebase.js';
+
 const classes = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -22,6 +24,51 @@ const classes = makeStyles((theme) => ({
   },
 }));
 
+function setupcamera(){
+  var video = document.getElementById('webcam');
+  var snapshotCanvas = document.getElementById('snapshot');
+  var stream = navigator.mediaDevices
+  .getUserMedia({
+    audio: false,
+    video: true ,
+    facingMode: "user",
+  }).then(function(stream) {
+    video.srcObject = stream;
+    video.play();
+    setTimeout(function(){ snapshot(video, snapshotCanvas, stream);}, 1000);
+    //setInterval(function(){snapshot(video, snapshotCanvas, stream);},1000000);
+  }).catch(function (error) {
+    console.error('mediaDevice.getUserMedia() error:', error);
+    return;
+  });
+}
+    
+function snapshot(video, canvas, stream){
+  var ctx = canvas.getContext('2d');
+  canvas.width =video.videoWidth;
+  canvas.height =video.videoHeight;
+  var w = canvas.width;
+  var h = canvas.height;
+  ctx.drawImage(video, 0, 0, w, h);
+
+  console.log(w,h);
+
+  // Create a root reference
+  var storageRef = firestorage.ref();
+  // Create a reference to 'mountains.jpg'
+  var mountainsRef = storageRef.child('mountains.jpg');
+
+  canvas.toBlob(function(blob) {
+    var img = document.createElement('image');
+    img.srcObject = stream;
+    
+    mountainsRef.put(blob).then(function(img) {
+      console.log('Uploaded a blob or file!');
+    });
+  }, 'image/jpeg', 0.95);
+  
+}
+
 class AppMovie extends Component {
   constructor(props) {
     super(props);
@@ -33,6 +80,9 @@ class AppMovie extends Component {
     this.state = {
       nowTime: '状態：アクティブかどうか判定します'
     };
+
+    this.video = document.getElementById('webcam');
+    this.canvas = document.getElementById('snapshot');
   }
 
   getTime(timelag = 0) {
@@ -66,6 +116,7 @@ class AppMovie extends Component {
   }
   componentDidMount(){
     window.addEventListener("focus", this.onFocus,false)
+    setupcamera();
   }
 
   onFocus = (event) => {
@@ -128,6 +179,8 @@ class AppMovie extends Component {
       <CssBaseline/><Container>
         <iframe width="800" height="600" loading = "lazy" src={this.full_url} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
         </iframe></Container>
+        <video id="webcam" hidden></video>
+        <canvas id="snapshot" hidden></canvas>
         </div>
     );
   }

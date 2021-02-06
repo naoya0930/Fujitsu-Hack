@@ -1,3 +1,4 @@
+
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/storage';
@@ -14,7 +15,6 @@ firebase.apps.length
     appId: "1:583761359383:web:b478f964c0beba29d16252",
     measurementId: "G-PGG490CGCK"
     });
-    const firestore=firebase.firestore();
-    const storage = firebase.storage();
-    
-export {firestore, storage};
+
+export const firestore = firebase.firestore();
+export const firestorage = firebase.storage();
