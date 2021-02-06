@@ -117,6 +117,10 @@ class AppMovie extends Component {
     window.addEventListener("focus", this.onFocus,false)
     setupcamera();
     this.pageStartTime = Date.now()
+    firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',this.props.location.state.user_id).get().then((e)=>{
+      e.docs.forEach((r) => r.ref.collection('lectures').where('lecture_id','==',this.props.location.state.lecture_id).get().then((ee)=>{
+        ee.docs.forEach((rr) => rr.ref.update({lecture_status:"0"}))}))})
+
   }
 
   onFocus = (event) => {
@@ -167,7 +171,7 @@ class AppMovie extends Component {
       notification.addEventListener('click', (event) => {console.dir(event);}, false);
       this.pageEndTime = Date.now()
       this.pageElapsedTime = this.pageEndTime-this.pageStartTime
-      this.activation = 1-(this.elapsedTime/this.pageElapsedTime)
+      this.activation = (1-(this.elapsedTime/this.pageElapsedTime))*100
       console.log(this.props.location.state.user_id)
       firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',this.props.location.state.user_id).get().then((e)=>{
         e.docs.forEach((r) => r.ref.collection('lectures').where('lecture_id','==',this.props.location.state.lecture_id).get().then((ee)=>{

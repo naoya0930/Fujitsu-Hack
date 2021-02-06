@@ -113,6 +113,8 @@ const ParentPage =(props)=> {
     const [userEndLecture, setUserEndLecture]=useState([]);
     const [userNowLecture, setUserNowLecture]=useState([]);
     const [userFutureLecture, setUserFutureLecture]=useState([]);
+    const [title,settitle]=useState([]);
+    const [options,setoptions]=useState([]);
 
     const colors = ["#00FF00", "#0000FF"];
 
@@ -141,15 +143,20 @@ const ParentPage =(props)=> {
                 let z=[];
                 data.forEach((item)=>{
                     if(item.lecture_status==='0'){
-                        //今受けている
+                        //今受けている授業中=0
                         x.push(item);
+                        settitle('授業開始')
+                        setoptions({body : 'お子さんの授業が開始しました',
+                        icon : 'アイコン画像のパス',
+                        data : {foo : '任意のデータ'}})
+
                         //setUserEndLecture(x);
                     }else if(item.lecture_status==='1'){
-                        //未来の授業
+                        //未来の授業1
                         y.push(item);
                         //setUserNowLecture(userNowLecture.push(item.data()));
                     }else{
-                        //過去の授業
+                        //過去の授業2
                         z.push(item);
                         //setUserFutureLecture(userFutureLecture.push(item.data()));
                     }
@@ -157,7 +164,13 @@ const ParentPage =(props)=> {
                 setUserEndLecture(z);
                 setUserNowLecture(x);
                 setUserFutureLecture(y);
-                setUserLectures(data);　//全部のデータ入ってる
+                setUserLectures(data);
+
+
+                const notification = new Notification(title, options);
+                notification.addEventListener('click', (event) => {
+                console.dir(event);
+                  }, false);　//全部のデータ入ってる
             }));
         });
     }, []);
@@ -198,9 +211,9 @@ const ParentPage =(props)=> {
 
     function put_Time(time){
       time = time.toDate();
-      
+
       const formatter = new Intl.NumberFormat('ja', {
-        minimumIntegerDigits: 2, 
+        minimumIntegerDigits: 2,
         useGrouping: false
       });
 
@@ -218,7 +231,7 @@ const ParentPage =(props)=> {
         //強制非表示
         img.hidden = false;
         img.src = "";
-      }); 
+      });
     }
 
     function LectureCard(item, cardstyle, view_concentrate=true){
@@ -324,7 +337,7 @@ const ParentPage =(props)=> {
               統計
             </Typography>
           </CardContent>
-          
+
           <CardContent style={styles.statisticsCard}>
             {/*<GridList styles={styles.statisticsGrid} cols={3}>*/}
             <p style={styles.statisticsP}>
