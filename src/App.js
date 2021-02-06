@@ -9,7 +9,7 @@ import ChildPage from './Components/ChildPage';
 import TeacherPage from './Components/TeacherPage';
 import TeacherLogin from './Components/TeacherLogin';
 import Movie from './Components/Movie';
-
+import Home from './Components/Home';
 //import Home from './Home';
 //const YOUTUBE_API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY;
 const App = () => {
@@ -33,6 +33,7 @@ const App = () => {
         <Router>
           <div>
             <Navbar /><hr/>
+            <Route path='/' component={Home}/>
             <Route path='/About' component={About}/>
             <Route path='/ChildPage' component={ChildPage}/>
             <Route path='/ChildLogin' component={ChildLogin}/>
