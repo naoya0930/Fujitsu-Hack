@@ -19,21 +19,7 @@ class About extends React.Component {
         this.handleChange = this.handleChange.bind(this)
         this.handleClick_error = this.handleClick_error.bind(this)
         this.handleClick_his = this.handleClick_his.bind(this)
-
-        }
-  static async getInitialProps() {
-    let result = await
-    firestore.collection('users').get().then(snapshot => {
-      let data = []
-      snapshot.forEach((doc) => {
-          data.push(Object.assign({id: doc.id}, doc.data()))
-              })
-              console.log(data);
-              return data
-            }).catch(error => {
-              return []
-            })
-          return {datas: result}
+        this.state.users=firestore.collection('users').onSnapshot((collection) => {const users = collection.docs.map(item => item.data());})
         }
 
   handleChange (e) {
@@ -53,6 +39,7 @@ class About extends React.Component {
         }
   render(){
     return(
+
       <div class="form-wrapper">
         <Container maxwidth="xl"><h1>子供ログインページ</h1></Container>
         <form>
@@ -75,12 +62,7 @@ class About extends React.Component {
       :<Button variant="contained" color="primary" onClick={this.handleClick_error}>サインイン</Button>}
     <div class="form-item">
     <h3>{this.state.Login}</h3>
-    <h3>{this.props.datas.map(users =>
-            <li key={users.age}>
-                <Link href="/p/[detailid]" as={`/p/${users.id}`}>
-                  <a>{users.age}</a>
-                </Link>
-            </li>)}</h3>
+
     </div>
     </form>
     </div>

@@ -40,7 +40,8 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 
-const classes = makeStyles((theme) => ({
+const About =() => {
+  const classes = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
   },
@@ -55,11 +56,11 @@ const classes = makeStyles((theme) => ({
   },
 }));
 
-function createData(id, classname, subject, url, status) {
-  return { id, classname, subject, url, status };
+  const createData = (lecture_id, lecture_name, lecture_subject, lecture_url, lecture_status) =>  {
+  return { lecture_id, lecture_name, lecture_subject, lecture_url, lecture_status };
   }
 
-const rows = [
+  const rows = [
   createData(1,'数1A','数学','https://youtu.be/G9JlVSA7Vtc','授業中'),
   createData(2,'基礎英語','英語','https://youtu.be/G9JlVSA7Vtc','授業中'),
   createData(3,'漢文','国語', 'https://youtu.be/G9JlVSA7Vtc' ,'授業前'),
@@ -86,15 +87,15 @@ const rows = [
   createData(24,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
 ];
 
-const headCells = [
-  { id: 'id', numeric: false, disablePadding: true, label: '授業ID' },
-  { id: 'classname', numeric: true, disablePadding: false, label: '授業名' },
-  { id: 'subject', numeric: true, disablePadding: false, label: '教科' },
-  { id: 'url', numeric: false, disablePadding: false, label: '授業URL' },
-  { id: 'status', numeric: true, disablePadding: false, label: '履修状況' },
+  const headCells = [
+  { id: 'lecture_id', numeric: false, disablePadding: true, label: '授業ID' },
+  { id: 'lecture_name', numeric: true, disablePadding: false, label: '授業名' },
+  { id: 'lecture_subject', numeric: true, disablePadding: false, label: '教科' },
+  { id: 'lecture_url', numeric: false, disablePadding: false, label: '授業URL' },
+  { id: 'lecture_status', numeric: true, disablePadding: false, label: '履修状況' },
 ];
 
-function descendingComparator(a, b, orderBy) {
+  const descendingComparator = (a, b, orderBy) => {
   if (b[orderBy] < a[orderBy]) {
     return -1;
   }
@@ -104,13 +105,13 @@ function descendingComparator(a, b, orderBy) {
   return 0;
 }
 
-function getComparator(order, orderBy) {
+  const getComparator = (order, orderBy) => {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-function stableSort(array, comparator) {
+  const stableSort = (array, comparator) => {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -120,7 +121,7 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-function EnhancedTableHead(props) {
+  const EnhancedTableHead = (props) => {
   const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
@@ -163,7 +164,7 @@ function EnhancedTableHead(props) {
   );
 }
 
-EnhancedTableHead.propTypes = {
+  EnhancedTableHead.propTypes = {
   classes: PropTypes.object.isRequired,
   numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
@@ -173,7 +174,7 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-const useToolbarStyles = makeStyles((theme) => ({
+  const useToolbarStyles = makeStyles((theme) => ({
   root: {
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(1),
@@ -193,7 +194,7 @@ const useToolbarStyles = makeStyles((theme) => ({
   },
 }));
 
-const EnhancedTableToolbar = (props) => {
+  const EnhancedTableToolbar = (props) => {
   const classes = useToolbarStyles();
   const { numSelected } = props;
 
@@ -230,11 +231,11 @@ const EnhancedTableToolbar = (props) => {
   );
 };
 
-EnhancedTableToolbar.propTypes = {
+  EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-const useStyles = makeStyles((theme) => ({
+  const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
   },
@@ -258,10 +259,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function EnhancedTable() {
+  const EnhancedTable = () => {
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('calories');
+  const [orderBy, setOrderBy] = React.useState('');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
@@ -377,14 +378,14 @@ function EnhancedTable() {
                       <TableCell component="th" id={labelId} scope="row" padding="none">
                         {row.id}
                       </TableCell>
-                      <TableCell align="right">{row.classname}</TableCell>
-                      <TableCell align="right">{row.subject}</TableCell>
+                      <TableCell align="right">{row.lecture_name}</TableCell>
+                      <TableCell align="right">{row.lecture_subject}</TableCell>
                       <Link to={{
                       pathname: '/Movie',
-                      state: {url:row.url},
+                      state: {url:row.lecture_url},
                       }}>
-                      <TableCell align="right" onClick={push_tag}>{row.url}</TableCell></Link>
-                      <TableCell align="right">{row.status}</TableCell>
+                      <TableCell align="right" onClick={push_tag}>{row.lecture_url}</TableCell></Link>
+                      <TableCell align="right">{row.lecture_status}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -414,20 +415,20 @@ function EnhancedTable() {
   );
 }
 //MenuAppBarの関数
-function MenuAppBar() {
-  const classes = styled();
-  const [auth, setAuth] = React.useState(true);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAuth(event.target.checked);
-  };
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const MenuAppBar = () => {
+    const classes = styled();
+    const [auth, setAuth] = React.useState(true);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setAuth(event.target.checked);
+    };
+    const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+      setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
 
   return (
     <div className={classes.root}>
@@ -478,51 +479,7 @@ function MenuAppBar() {
     </div>
   );
 }
-//Table表示の関数
-function Tab() {
-  const columns: ColDef[] = [
-  {field: 'id', headerName: '授業ID', width: 150 },
-  {field: 'classname', headerName: '授業名', width: 150 },
-  {field: 'subject', headerName: '教科', width: 130 },
-  {field: 'url',headerName: '授業URL',width: 500,},
-  {field: 'status',headerName: '履修状況',width: 150,},
-      ];
-  const rows = [
-    { id: 1, classname: '数1A', subject: '数学', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 2, classname: '基礎英語', subject: '英語', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',status: '授業中'  },
-    { id: 3, classname: '漢文', subject: '国語', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 4, classname: '道徳', subject: '道徳', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',status: '授業中'  },
-    { id: 5, classname: '生物基礎', subject: '理科', url: null ,status: '授業中' },
-    { id: 6, classname: '地理', subject: '社会', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 7, classname: '数1A', subject: '数学', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 8, classname: '基礎英語', subject: '英語', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',status: '授業中'  },
-    { id: 9, classname: '漢文', subject: '国語', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 10, classname: '道徳', subject: '道徳', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',status: '授業中'  },
-    { id: 11, classname: '生物基礎', subject: '理科', url: null ,status: '授業中' },
-    { id: 12, classname: '地理', subject: '社会', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 13, classname: '数1A', subject: '数学', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 14, classname: '基礎英語', subject: '英語', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',status: '授業中'  },
-    { id: 15, classname: '漢文', subject: '国語', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 16, classname: '道徳', subject: '道徳', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',status: '授業中'  },
-    { id: 17, classname: '生物基礎', subject: '理科', url: null ,status: '授業中' },
-    { id: 18, classname: '地理', subject: '社会', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 19, classname: 'Clifford', subject: 'Ferrara', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 20, classname: 'Frances', subject: 'Rossini', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 21, classname: 'Roxie', subject: 'Harvey', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',　status: '授業中'  },
-  ];
-  return (
-    <div style={{ height: 400, width: '100%' }}>
-      <DataGrid rows={rows} columns={columns} pageSize={10}/>
-    </div>
-  );
-}
 
-class About extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {names:null}
-    }
-  render(){
     return(
       <div>
       <Link to="/ChildLogin"><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
@@ -535,7 +492,6 @@ class About extends React.Component {
           <CssBaseline/><Container><EnhancedTable/></Container>
       </div>
       )
-  }
 }
 
 export default withRouter(About);
