@@ -156,10 +156,10 @@ class AppMovie extends Component {
     //window.addEventListener('focus', play);
     // ウィンドウからフォーカスが外れたら指定した関数を実行
     //window.addEventListener('blur', pause);
-    const push_tag = (event) => {
+    const push_tag = (event,name) => {
       const title    = '授業終了';
       const options  = {
-        body : 'お子さんが授業を終了をしました',
+        body : 'お子さんが授業「'+name+'」を終了をしました',
         icon : 'アイコン画像のパス',
         data : {foo : '任意のデータ'}
         };
@@ -182,7 +182,7 @@ class AppMovie extends Component {
 
     return (
       <div>
-      <Link to="/ChildPage" onClick={push_tag}><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
+      <Link to="/ChildPage" onClick={(event) => push_tag(event,this.props.location.state.lecture_name)}><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
         戻る{this.props.location.state.user_id}
       </Typography></Link>
       <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>

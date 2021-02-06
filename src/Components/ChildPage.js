@@ -126,8 +126,6 @@ const ChildPage =(props)=> {
       });
   }, []);
 
-  const lecture_str = userLecturesstr
-
   const headCells = [
   { id: 'lecture_id', numeric: false, disablePadding: true, label: '授業ID' },
   { id: 'lecture_name', numeric: true, disablePadding: false, label: '授業名' },
@@ -360,10 +358,10 @@ const ChildPage =(props)=> {
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, userLectures.length - page * rowsPerPage);
-  const push_tag = (event) => {
+  const push_tag = (event,name) => {
     const title    = 'お子さんが授業を開始しました';
     const options  = {
-      body : 'お子さんが授業を開始しました',
+      body : 'お子さんが授業「'+name+'」を開始しました',
       icon : 'アイコン画像のパス',
       data : {foo : '任意のデータ'}
       };
@@ -428,7 +426,7 @@ const ChildPage =(props)=> {
                         user_id:userId
                       },
                       }}>
-                      <TableCell align="right" onClick={push_tag}>{row.lecture_url}</TableCell></Link>
+                      <TableCell align="right" onClick= {(event) => push_tag(event, row.lecture_name)}>{row.lecture_url}</TableCell></Link>
                       <TableCell align="right" >{row.lecture_status}</TableCell>
                     </TableRow>
                   );
