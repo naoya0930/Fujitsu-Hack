@@ -11,6 +11,7 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import TeacherLogin from './TeacherLogin';
 import {PieChart, Pie, Cell} from 'recharts';
+import { firestore } from '../lib/firebase.js';
 
 var styles = ({
   div:{
@@ -76,8 +77,7 @@ var styles = ({
   },
 });
 
-function DrawGraph(data, colors)
-{
+function DrawGraph(data, colors){
   let sum = 0;
   data.map((entry, index) => {
     sum += entry.value;
@@ -108,13 +108,22 @@ function DrawGraph(data, colors)
   );
 };
 
-
 class About extends React.Component {
   constructor(props) {
         super(props);
-        this.state = {names2:null}
+        this.state = {lecture_name:null, lecture_id:null,lecture_subject:null,lecture_url:null,lec_id:null}
+        this.handleChange = this.handleChange.bind(this)
+
         }
+
+  handleChange(e){
+        let name = e.target.name; // フォームのname属性を取得
+        this.setState({[name]: e.target.value}) // name属性 = stateのkey名なのでstateに保存
+                      // name属性 = stateのkey名なのでstateに保存
+        }
+
   render(){
+
     const Concentration_Time = [
       {
         "name": "True",
@@ -145,8 +154,11 @@ class About extends React.Component {
         "value": 200
       },
     ]
-
     const colors = ["#00FF00", "#0000FF"]
+    const handleClick = (e,lecture_id,lecture_name,lecture_subject,lecture_url,lec_id) => {
+          console.log("wkjbwiuebkweckjwckbkcjbweiebce")
+          firestore.collection('HackApp').doc('lectures').collection('lectures').doc().set({lecture_id:lecture_id,lecture_name:lecture_name,lecture_subject:lecture_subject,lecture_url:lecture_url})
+        }
 
     return(
       <body>
@@ -252,24 +264,25 @@ class About extends React.Component {
             </p>
           </CardContent>
         </Card>
+
         <Card variant="elevation" color="#000000" style={styles.mainCard}>
           <CardContent >
             <Typography color="textSecondary" gutterBottom>
-              授業追加
+              授業追加{this.state.lecture_name}
             </Typography>
             　<label for="name">授業ID</label>
-            　<input type="text" name="classID" required="required" placeholder="授業ID"></input>
+            　<input type="classID" name="lecture_id" required="required" placeholder="授業ID" onChange={this.handleChange} value={this.state.lecture_id}></input>
             　<p/>
             　<label for="name">授業名</label>
-            　<input type="text" name="classname" required="required" placeholder="授業名"></input>
+            　<input type="classname" name="lecture_name" required="required" placeholder="授業名" onChange={this.handleChange} value={this.state.lecture_name}></input>
             　<p/>
             　<label for="name">教科名</label>
-            　<input type="text" name="subject" required="required" placeholder="教科名"></input>
+            　<input type="subject" name="lecture_subject" required="required" placeholder="教科名" onChange={this.handleChange} value={this.state.lecture_subject}></input>
             　<p/>
-            　<label for="name">URL　</label>
-            　<input type="url" name="url" required="required" placeholder="URL"></input>
+            　<label for="name">URL</label>
+            　<input type="url" name="lecture_url" required="required" placeholder="URL" onChange={this.handleChange} value={this.state.lecture_url}></input>
             　<p/>
-            　<Button variant="contained" color="primary">追加</Button>
+            　<Button variant="contained" color="primary" onClick={(event) => handleClick(event,this.state.lecture_id,this.state.lecture_name,this.state.lecture_subject,this.state.lecture_url)}>追加{this.add}</Button>
           </CardContent>
         </Card>
 
@@ -311,5 +324,7 @@ class About extends React.Component {
     )
   }
 }
+
+
 
 export default About;
