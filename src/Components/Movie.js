@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 import Typography from '@material-ui/core/Typography';
 import { createStyles, lighten, makeStyles, Theme } from '@material-ui/core/styles';
 
-//import { firestorage } from '../lib/firebase.js';
+import { firestorage } from '../lib/firebase.js';
 
 const classes = makeStyles((theme) => ({
   root: {
