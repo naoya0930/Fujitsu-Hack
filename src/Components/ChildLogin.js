@@ -5,8 +5,9 @@ import ParentPage from './ParentPage';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import Container from '@material-ui/core/Container';
-
 import { firestore } from '../lib/firebase.js';
+import firebase from 'firebase/app';
+import 'firebase/firestore';
 
 const ChildLogin = (props) => {
     const [name1, setname1] = useState('');

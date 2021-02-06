@@ -114,7 +114,6 @@ const ParentPage =(props)=> {
     const [userNowLecture, setUserNowLecture]=useState([]);
     const [userFutureLecture, setUserFutureLecture]=useState([]);
 
-
     const colors = ["#00FF00", "#0000FF"];
 
     const Concentration_Time = [{value:400}, {value:300}]
@@ -162,7 +161,7 @@ const ParentPage =(props)=> {
             }));
         });
     }, []);
-    
+
     function DrawGraph(data, colors){
       let sum = 0;
       data.map((entry, index) => {
@@ -172,7 +171,6 @@ const ParentPage =(props)=> {
       return (
         <PieChart width={250} height={250}>
           {/*}<text x={"50%"} y={"50%"} textAnchor="middle">{"50%"}</text>{/**/}
-
           <text  x={"50%"} y={"52%"} fontSize={20} fontwewight={600} textAnchor="middle">
           {Math.round(100*data[0].value/sum)} %
           </text>

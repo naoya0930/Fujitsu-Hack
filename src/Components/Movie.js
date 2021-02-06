@@ -6,8 +6,8 @@ import { withRouter } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import Typography from '@material-ui/core/Typography';
 import { createStyles, lighten, makeStyles, Theme } from '@material-ui/core/styles';
-
 import { firestorage } from '../lib/firebase.js';
+import { firestore } from '../lib/firebase.js';
 
 const classes = makeStyles((theme) => ({
   root: {
@@ -23,7 +23,6 @@ const classes = makeStyles((theme) => ({
     minWidth: 650,
   },
 }));
-
 function setupcamera(){
   var video = document.getElementById('webcam');
   var snapshotCanvas = document.getElementById('snapshot');
@@ -42,7 +41,6 @@ function setupcamera(){
     return;
   });
 }
-    
 function snapshot(video, canvas, stream){
   var ctx = canvas.getContext('2d');
   canvas.width =video.videoWidth;
@@ -61,19 +59,20 @@ function snapshot(video, canvas, stream){
   canvas.toBlob(function(blob) {
     var img = document.createElement('image');
     img.srcObject = stream;
-    
+
     mountainsRef.put(blob).then(function(img) {
       console.log('Uploaded a blob or file!');
     });
   }, 'image/jpeg', 0.95);
-  
+
 }
 
 class AppMovie extends Component {
   constructor(props) {
     super(props);
     this.u = "https://www.youtube.com/embed/"
-    this.full_url = this.u+this.props.location.state.url.slice(17)+"?autoplay=1&mute=1"
+    this.full_url = this.u+this.props.location.state.lecture_url.slice(17)+"?autoplay=1&mute=1"
+
     this.startTime = null
     this.endTime = null
     this.elapsedTime = null
@@ -117,6 +116,7 @@ class AppMovie extends Component {
   componentDidMount(){
     window.addEventListener("focus", this.onFocus,false)
     setupcamera();
+    this.pageStartTime = Date.now()
   }
 
   onFocus = (event) => {
@@ -156,22 +156,34 @@ class AppMovie extends Component {
     //window.addEventListener('focus', play);
     // ウィンドウからフォーカスが外れたら指定した関数を実行
     //window.addEventListener('blur', pause);
-    const push_tag = (event) => {
-      const title    = 'お子さんが授業を終了しました';
+    const push_tag = (event,name) => {
+      const title    = '授業終了';
       const options  = {
-        body : 'お子さんが{授業名}の終了を始めました',
+        body : 'お子さんが授業「'+name+'」を終了をしました',
         icon : 'アイコン画像のパス',
         data : {foo : '任意のデータ'}
         };
       const notification = new Notification(title, options);
-      notification.addEventListener('click', (event) => {
-      console.dir(event);}, false);
+      notification.addEventListener('click', (event) => {console.dir(event);}, false);
+      this.pageEndTime = Date.now()
+      this.pageElapsedTime = this.pageEndTime-this.pageStartTime
+      this.activation = 1-(this.elapsedTime/this.pageElapsedTime)
+      console.log(this.props.location.state.user_id)
+      firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',this.props.location.state.user_id).get().then((e)=>{
+        e.docs.forEach((r) => r.ref.collection('lectures').where('lecture_id','==',this.props.location.state.lecture_id).get().then((ee)=>{
+          ee.docs.forEach((rr) => rr.ref.update({lecture_status:"2",user_activation:this.activation,user_concentration:20})
+        )
+      })
+      )});
+
       };
+
+
 
     return (
       <div>
-      <Link to="/ChildPage" onClick={push_tag}><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
-        戻る
+      <Link to="/ChildPage" onClick={(event) => push_tag(event,this.props.location.state.lecture_name)}><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
+        戻る{this.props.location.state.user_id}
       </Typography></Link>
       <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
         日時:{this.state.nowTime}　非アクティブだった合計時間(秒){this.elapsedTime/1000}
