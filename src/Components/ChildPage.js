@@ -421,7 +421,12 @@ const ChildPage =(props)=> {
                       <TableCell align="right">{row.lecture_subject}</TableCell>
                       <Link to={{
                       pathname: '/Movie',
-                      state: {url:row.lecture_url},
+                      state: {
+                        lecture_url:row.lecture_url,
+                        lecture_name:row.lecture_name,
+                        lecture_id:row.lecture_id,
+                        user_id:userId
+                      },
                       }}>
                       <TableCell align="right" onClick={push_tag}>{row.lecture_url}</TableCell></Link>
                       <TableCell align="right" >{row.lecture_status}</TableCell>
@@ -484,11 +489,7 @@ const ChildPage =(props)=> {
           <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'100%',fontSize: "24px"}}>
             名前:
           </Typography>
-          <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "24px"}}>
-            パスワード:
-          </Typography>
           <Route path='/ChildLogin' component={ChildLogin}/>
-
 
           {auth && (
             <div>
@@ -522,7 +523,7 @@ const ChildPage =(props)=> {
     return(
       <div>
       <Link to="/ChildLogin"><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
-        ログインページにもどる{userLecturesstr.map((x, i) => <div key={i}>{`${i}_${x}`}</div>)}
+        ログインページにもどる
       </Typography></Link>
       <MenuAppBar/>
         <CssBaseline/><Container><Button variant="contained" style={{margin:'auto',width:'100%',fontSize: "40px"}}>
