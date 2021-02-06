@@ -69,7 +69,6 @@ const ChildPage =(props)=> {
   const [userNowLecture, setUserNowLecture]=useState([]);
   const [userFutureLecture, setUserFutureLecture]=useState([]);
   const [userLecturesstr, setUserLecturesstr]=useState([]);
-
   const colors = ["#00FF00", "#0000FF"];
 
   const Concentration_Time = [{value:400}, {value:300}]
@@ -77,7 +76,7 @@ const ChildPage =(props)=> {
   const Active_Time = [{value:500}, {value:200}]
 
   useEffect(() => {
-      firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',childid).get().then((d)=>{
+    firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',childid).get().then((d)=>{
           //何故かasyncが必須。
           let dx=d.docs.map(item=>item.data());
           dx.map(element=>{
@@ -124,6 +123,7 @@ const ChildPage =(props)=> {
           }));
 
       });
+
   }, []);
 
   const headCells = [
@@ -131,7 +131,7 @@ const ChildPage =(props)=> {
   { id: 'lecture_name', numeric: true, disablePadding: false, label: '授業名' },
   { id: 'lecture_subject', numeric: true, disablePadding: false, label: '教科' },
   { id: 'lecture_url', numeric: false, disablePadding: false, label: '授業URL' },
-  { id: 'lecture_status2', numeric: true, disablePadding: false, label: '履修状況' },
+  { id: 'lecture_status', numeric: true, disablePadding: true, label: '状況' },
 ];
 
   const descendingComparator = (a, b, orderBy) => {
@@ -249,7 +249,7 @@ const ChildPage =(props)=> {
         </Typography>
       ) : (
         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          授業を受けよう
+          授業を受けよう!!
         </Typography>
       )}
 
@@ -358,7 +358,24 @@ const ChildPage =(props)=> {
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, userLectures.length - page * rowsPerPage);
+
   const push_tag = (event,name) => {
+    if (!('Notification' in window)) {
+  alert('未対応のブラウザです');
+}
+    else {
+  // 許可を求める
+  Notification.requestPermission()
+    .then((permission) => {
+      if (permission == 'granted') {
+        // 許可
+      } else if (permission == 'denied') {
+        // 拒否
+      } else if (permission == 'default') {
+        // 無視
+      }
+    });
+}
     const title    = 'お子さんが授業を開始しました';
     const options  = {
       body : 'お子さんが授業「'+name+'」を開始しました',
@@ -485,10 +502,9 @@ const ChildPage =(props)=> {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'100%',fontSize: "24px"}}>
-            名前:
+            名前:{userName}のページ
           </Typography>
           <Route path='/ChildLogin' component={ChildLogin}/>
-
           {auth && (
             <div>
               <IconButton aria-label="account of current user" aria-controls="menu-appbar"aria-haspopup="true"onClick={handleMenu}color="inherit">
@@ -525,8 +541,7 @@ const ChildPage =(props)=> {
       </Typography></Link>
       <MenuAppBar/>
         <CssBaseline/><Container><Button variant="contained" style={{margin:'auto',width:'100%',fontSize: "40px"}}>
-
-         <h0>授業履修状況</h0></Button></Container>
+         <h0>授業リスト</h0></Button></Container>
           <CssBaseline/>
           <Container>
               <EnhancedTable/>
