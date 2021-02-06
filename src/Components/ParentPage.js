@@ -1,16 +1,21 @@
 import React from 'react'
 import Button from '@material-ui/core/Button';
 import Createicon from '@material-ui/icons/Create';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import ParentLogin from './ParentLogin';
 import {PieChart, Pie, Cell} from 'recharts';
+
+import { firestorage } from '../lib/firebase.js';
 
 var styles = ({
   div:{
@@ -30,6 +35,7 @@ var styles = ({
     marginTop: 5,
     marginBottom: 5,
     borderWidth: 2,
+    width: '100%',
   },
   statusText:{
     fontWeight: 600,
@@ -76,6 +82,7 @@ var styles = ({
   },
 });
 
+
 function DrawGraph(data, colors){
   let sum = 0;
   data.map((entry, index) => {
@@ -107,42 +114,45 @@ function DrawGraph(data, colors){
   );
 };
 
+function requestChildImage(){
+  var storageRef = firestorage.ref();
+  var img = document.getElementById('childimage');
+  img.hidden = !img.hidden;
+
+  storageRef.child('mountains.jpg').getDownloadURL().then(function(url){
+    img.src = url;
+  }).catch( function (error) {
+    console.log("Firestorage Image GET and Show : " + error.message)
+    //強制非表示
+    img.hidden = false;
+    img.src = "";
+  }); 
+}
+
 class About extends React.Component {
   constructor(props) {
-        super(props);
-        this.state = {names2:null}
-        }
+    super(props);
+    this.state = {
+      names2:null,
+      childname:"",
+      Concentration_Time : [{value: 400},{value: 300}],
+      Gaze_Time : [{value: 200},{value: 500}],
+      Active_Time : [{value: 500},{value: 200}],
+    }
+  }
+
+  chialdname_chane = (event) => {
+    this.setState({childname : event.target.value})
+
+    //子供が変わったときのグラフ変更デモ
+    this.setState({
+      Concentration_Time : this.state.Gaze_Time,
+      Gaze_Time : this.state.Concentration_Time
+    })
+  }
+
   render(){
-    const Concentration_Time = [
-      {
-        "name": "True",
-        "value": 400
-      },
-      {
-        "name": "False",
-        "value": 300
-      },
-    ]
-    const Gaze_Time = [
-      {
-        "name": "True",
-        "value": 200
-      },
-      {
-        "name": "False",
-        "value": 500
-      },
-    ]
-    const Active_Time = [
-      {
-        "name": "True",
-        "value": 500
-      },
-      {
-        "name": "False",
-        "value": 200
-      },
-    ]
+    
 
     const colors = ["#00FF00", "#0000FF"]
 
@@ -153,25 +163,27 @@ class About extends React.Component {
         ログインページにもどる
       </Typography></Link>
         <br/>
-        <Select
-          labelId="demo-simple-select-filled"
-          id="demo-simple-select-filled"
-          value={""}
-          label="Age"
-          variant="filled"
-          style={styles.formControl}
-          //onChange={handleChange}
-        >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          <MenuItem value={10}>Ten</MenuItem>
-          <MenuItem value={20}>Twenty</MenuItem>
-          <MenuItem value={30}>Thirty</MenuItem>
-        </Select>
-        <p class="alert alert-danger" style={styles.status}>
+        <FormControl variant="filled" style={styles.formControl}>
+          <InputLabel id="child-select-label">名前</InputLabel>
+          <Select
+            labelId="child-select-label"
+            id="child-select"
+            value={this.state.childname}
+            variant="filled"
+            style={styles.formControl}
+            onChange={this.chialdname_chane}
+          >
+            <MenuItem value={10}>Ten</MenuItem>
+            <MenuItem value={20}>Twenty</MenuItem>
+            <MenuItem value={30}>Thirty</MenuItem>
+          </Select>
+        </FormControl>
+        <Button class="alert alert-danger" style={styles.status} onClick={requestChildImage}>
           <h2 style={styles.statusText}><Createicon/>授業中</h2>
-        </p>
+        </Button>
+        <Card variant="elevation" style={styles.mainCard}>
+          <CardMedia component="img" id="childimage" hidden></CardMedia>
+        </Card>
         {/*
         <Box class="border rounded" style={styles.classNow}>
           <h2 style={styles.classText}>数学</h2>
@@ -179,7 +191,7 @@ class About extends React.Component {
         </Box>
         */}
 
-        <Card variant="elevation" color="#000000" style={styles.mainCard}>
+        <Card variant="elevation" style={styles.mainCard}>
           <CardContent >
             <Typography color="textSecondary" gutterBottom>
               授業中の科目
@@ -238,7 +250,7 @@ class About extends React.Component {
                 <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
                   集中度
                 </Typography>
-                {DrawGraph(Concentration_Time, colors)}
+                {DrawGraph(this.state.Concentration_Time, colors)}
               </CardContent>
             </Card>
             <Card variant="elevation" color="#000000" style={styles.classPast}>
@@ -246,7 +258,7 @@ class About extends React.Component {
                 <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
                 注視度
                 </Typography>
-                {DrawGraph(Gaze_Time, colors)}
+                {DrawGraph(this.state.Gaze_Time, colors)}
               </CardContent>
             </Card>
             <Card variant="elevation" color="#000000" style={styles.classPast}>
@@ -254,7 +266,7 @@ class About extends React.Component {
                 <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
                 アクティブ度
                 </Typography>
-                {DrawGraph(Active_Time, colors)}
+                {DrawGraph(this.state.Active_Time, colors)}
               </CardContent>
             </Card>
           </CardContent>
