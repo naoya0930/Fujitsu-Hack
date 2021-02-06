@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { getInitialState, useEffect, useState } from 'react'
 import Button from '@material-ui/core/Button';
 import Createicon from '@material-ui/icons/Create';
 import Select from '@material-ui/core/Select';
@@ -11,6 +11,9 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import ParentLogin from './ParentLogin';
 import {PieChart, Pie, Cell} from 'recharts';
+
+import { firestore } from '../lib/firebase.js';
+import { assign } from 'lodash';
 
 var styles = ({
   div:{
@@ -108,12 +111,20 @@ function DrawGraph(data, colors){
   );
 };
 
-class About extends React.Component {
-  constructor(props) {
-        super(props);
-        this.state = {names2:null}
-        }
-  render(){
+const ParentPage =(props)=> {
+    //TODO: undefined のときの処理
+    const [childid,setChildid]=useState('user1');
+        /*=useState(typeof props.location.state.user_id);*/
+    const [userId, setUserId]=useState('');
+    const [userName, setUserName]=useState('');
+    const [userLectures, setUserLectures]=useState([]);
+    const [userEndLecture, setUserEndLecture]=useState([]);
+    const [userNowLecture, setUserNowLecture]=useState([]);
+    const [userFutureLecture, setUserFutureLecture]=useState([]);
+
+
+    const colors = ["#00FF00", "#0000FF"];
+
     const Concentration_Time = [
       {
         "name": "True",
@@ -144,11 +155,52 @@ class About extends React.Component {
         "value": 200
       },
     ]
+    useEffect(() => {
+        firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',childid).get().then((d)=>{
+            //何故かasyncが必須。
+            let dx=d.docs.map(item=>item.data());
+            dx.map(element=>{
+                //console.log(childid);
+                //console.log(element.user_id);
+                setUserId(element.user_id);
+                setUserName(element.user_name);
+                //const data = element.lectures.map((item)=>{item.data()});
+                //setUserLectures(data);
+            });
+            d.docs.forEach(item=>item.ref.collection('lectures').onSnapshot((coll)=>{
+                let data=coll.docs.map(item=>item.data());
+                //console.log(data);
+                //終わった授業などを仕分け
+                let x=[];
+                let y=[];
+                let z=[];
+                data.forEach((item)=>{
+                    if(item.lecture_status==='0'){
+                        //今受けている
+                        x.push(item);
+                        //setUserEndLecture(x);
+                    }else if(item.lecture_status==='1'){
+                        //未来の授業
+                        y.push(item);
+                        //setUserNowLecture(userNowLecture.push(item.data()));
+                    }else{
+                        //過去の授業
+                        z.push(item);
+                        //setUserFutureLecture(userFutureLecture.push(item.data()));
+                    }
+                })
+                setUserEndLecture(z);
+                setUserNowLecture(x);
+                setUserFutureLecture(y);
+                setUserLectures(data);　//全部のデータ入ってる
+            }));
+        });
+    }, []);
 
-    const colors = ["#00FF00", "#0000FF"]
 
     return(
       <body>
+          <h1>{userName}さんのページです</h1>
       <div style={styles.div}>
       <Link to="/ParentLogin"><Typography variant="h6" style={{margin:'auto',width:'250%',fontSize: "18px"}}>
         ログインページにもどる
@@ -185,12 +237,14 @@ class About extends React.Component {
             <Typography color="textSecondary" gutterBottom>
               授業中の科目
             </Typography>
+            {userNowLecture.map((x)=>
             <p style={styles.classNow}>
               <Typography style={styles.classText} variant="h4" component="h2">
-              数学
+                  {x.lecture_name}
               </Typography>
-              <Typography style={styles.classTime}>10:20~<br/>11:50</Typography>
+              <Typography style={styles.classTime}>aaa~aaa<br/></Typography>
             </p>
+            )}
           </CardContent>
         </Card>
         <Card variant="elevation" color="#000000" style={styles.mainCard}>
@@ -198,6 +252,7 @@ class About extends React.Component {
             <Typography color="textSecondary" gutterBottom>
               これまで受けた授業
             </Typography>
+            {//userEndLecture.map((x)=>{
             <p style={styles.classNow}>
               <Card variant="elevation" color="#000000" style={styles.classPast}>
                 <CardContent >
@@ -224,6 +279,8 @@ class About extends React.Component {
                 </CardContent>
               </Card>
             </p>
+            //})
+        }
           </CardContent>
         </Card>
 
@@ -263,7 +320,6 @@ class About extends React.Component {
       </div>
       </body>
     )
-  }
 }
 
-export default About;
+export default ParentPage;

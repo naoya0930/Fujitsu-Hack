@@ -27,14 +27,14 @@ const ParentLogin = (props) => {
         firestore.collection('HackApp').doc('Users').collection('parents').get().then((d)=>{
             let dx=d.docs.map(item=>item.data());
             //console.log(dx);
-            dx.forEach(element => {
+            dx.map(element => {
                 console.log(element.parent_id);
                 console.log(element.parent_pass);
+                //console.log(element.user_id);
                 if(element.parent_id===name2&&element.parent_pass===password2) {
-                    //console.log("OK");
                     props.history.push({
                         pathname: '/ParentPage',
-                        state: {}
+                        state: {user_id:element.user_id}
                         })
                 }else{
                     //console.log("NG");
