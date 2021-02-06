@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component , Prompt } from "react";
 import "video-react/dist/video-react.css"; // import css
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
@@ -9,6 +9,7 @@ import * as faceapi from 'face-api.js';
 import { createStyles, lighten, makeStyles, Theme } from '@material-ui/core/styles';
 
 import { firestorage } from '../lib/firebase.js';
+const {format} = require('util');
 
 const classes = makeStyles((theme) => ({
   root: {
@@ -26,105 +27,40 @@ const classes = makeStyles((theme) => ({
 }));
 
 let FaceModel_loaded = false;
+const SCORE_THRESHHOLD = 0.7;
 
 async function setupModel(){
-  await faceapi.nets.tinyFaceDetector.load("/")
-  
-  console.log("MODEL_SETUP_FINISH")
-  FaceModel_loaded = true
-}
-
-function setupcamera(){
-  var video = document.getElementById('webcam');
-  var snapshotCanvas = document.getElementById('snapshot');
-  var stream = navigator.mediaDevices
-  .getUserMedia({
-    audio: false,
-    video: true ,
-    facingMode: "user",
-  }).then(function(stream) {
-    video.srcObject = stream;
-    video.play();
-    setTimeout(function(){ 
-      snapshot(video, snapshotCanvas, stream);
-      //60秒に一回送信
-      setInterval(function(){snapshot(video, snapshotCanvas, stream);},5000);
-    }, 1000);
-  }).catch(function (error) {
-    console.error('mediaDevice.getUserMedia() error:', error);
+  try{
+    await faceapi.nets.tinyFaceDetector.load("/");
+    await faceapi.nets.faceLandmark68TinyNet.load("/");
+    console.log("MODEL_SETUP_FINISH")
+    FaceModel_loaded = true
+  }catch(error){
+    console.log("MODEL_SETUP_FAILED : ", error.message)
     return;
-  });
+  };
 }
-    
-function snapshot(video, canvas, stream){
-  
-  var ctx = canvas.getContext('2d');
-  canvas.width =video.videoWidth;
-  canvas.height =video.videoHeight;
-  var w = canvas.width;
-  var h = canvas.height;
-  //  webカメラの映像から顔認識を行う
-  if(FaceModel_loaded){
-  const useTinyModel = true;
-  faceapi.detectSingleFace(
-      video,
-      new faceapi.TinyFaceDetectorOptions({
-      inputSize: 160,
-      })
-    ).then((detection)=>{
-      if(w<=0 || h<=0)
-        return;
-      console.log(w,h)
-      console.log("DETECT")
-      // 認識データをリサイズ
-      const resizedDetection = faceapi.resizeResults(detection, {
-        width: w,
-        height: h,
-      });
 
-      // ランドマークをキャンバスに描画
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      faceapi.draw.drawDetections(canvas, resizedDetection);
-    }).catch((error)=>{
-      console.log(error.message())
-    });
-  }
-  ctx.drawImage(video, 0, 0, w, h);
-
-  console.log(w,h);
-
-  // Create a root reference
-  var storageRef = firestorage.ref();
-  // Create a reference to 'mountains.jpg'
-  var mountainsRef = storageRef.child('mountains.jpg');
-
-  canvas.toBlob(function(blob) {
-    var img = document.createElement('image');
-    img.srcObject = stream;
-    
-    mountainsRef.put(blob).then(function(img) {
-      console.log('Uploaded a blob or file!');
-    });
-  }, 'image/jpeg', 0.95);
-  
-}
 
 class AppMovie extends Component {
   constructor(props) {
     super(props);
     this.u = "https://www.youtube.com/embed/"
     this.full_url = this.u+this.props.location.state.url.slice(17)+"?autoplay=1&mute=1"
-    this.startTime = null
-    this.endTime = null
-    this.elapsedTime = null
+    this.startTime = 0
+    this.endTime = 0
+    this.elapsedTime = 0
     this.state = {
-      nowTime: '状態：アクティブかどうか判定します'
+      nowTime: '状態：アクティブかどうか判定します',
+      capture_count: 0,
+      look_count: 0,
     };
 
     this.video = document.getElementById('webcam');
     this.canvas = document.getElementById('snapshot');
 
     setupModel();
+
   }
 
   getTime(timelag = 0) {
@@ -158,7 +94,28 @@ class AppMovie extends Component {
   }
   componentDidMount(){
     window.addEventListener("focus", this.onFocus,false)
-    setupcamera();
+    var snapshotCanvas = document.getElementById('snapshot');
+    
+    var video = document.getElementById('webcam');
+    try{
+      navigator.mediaDevices
+      .getUserMedia({
+        audio: false,
+        video: true ,
+        facingMode: "user",
+      }).then((stream) => {
+        video.srcObject = stream;
+        video.play();
+        setTimeout(() => {
+          this.snapshot(video, snapshotCanvas, stream);
+          //10秒に一回カウント
+          this.intervalID = setInterval(() => {this.onTimerSnspshot(video, snapshotCanvas, stream)},10000,);
+        }, 3000);
+      });
+    }catch(error){
+      console.error('mediaDevice.getUserMedia() error:', error);
+      return NaN;
+    }
   }
 
   onFocus = (event) => {
@@ -180,6 +137,82 @@ class AppMovie extends Component {
       });
     this.startTime = Date.now();
   }
+
+  snapshot(video, canvas, stream){ 
+  var ctx =  canvas.getContext('2d'); 
+  canvas.width =video.videoWidth;
+  canvas.height =video.videoHeight;
+  var w = canvas.width;
+  var h = canvas.height; 
+  ctx.drawImage(video, 0, 0, w, h);
+
+  console.log(w,h);
+
+  // Create a root reference
+  var storageRef = firestorage.ref();
+  // Create a reference to 'mountains.jpg'
+  var mountainsRef = storageRef.child('mountains.jpg');
+
+  canvas.toBlob(function(blob) {
+    var img = document.createElement('image');
+    img.srcObject = stream;
+    
+    mountainsRef.put(blob).then(function(img) {
+      console.log('Uploaded a blob or file!');
+    });
+  }, 'image/jpeg', 0.95); 
+}
+
+  onTimerSnspshot(video, canvas, stream){
+  var txt = document.getElementById("text")
+  var txt2 = document.getElementById("text2")
+  canvas.width =video.videoWidth;
+  canvas.height =video.videoHeight;
+  var w = canvas.width;
+  var h = canvas.height;
+  //  webカメラの映像から顔認識を行う
+  if(FaceModel_loaded){
+  const useTinyModel = true;
+  faceapi.detectSingleFace(
+      video,
+      new faceapi.TinyFaceDetectorOptions({
+      inputSize: 160,
+      scoreThreshold: SCORE_THRESHHOLD
+      })
+    ).withFaceLandmarks(useTinyModel)
+    .then((detection)=>{
+      this.setState( {capture_count: this.state.capture_count+1} );
+      if(!detection){
+        return
+      }
+      // 認識データをリサイズ
+      const resizedDetection = faceapi.resizeResults(detection, {
+        width: w,
+        height: h,
+      })
+
+      
+      var landmarks = resizedDetection.landmarks;
+      
+      var ns = landmarks.getNose()[3];
+      var lo = landmarks.getJawOutline()[0];  //左頬
+      var ro = landmarks.getJawOutline()[16]; //右頬
+
+      var ln = Math.sqrt((lo.x-ns.x)**2+(lo.y-ns.y)**2);
+      var rn = Math.sqrt((ro.x-ns.x)**2+(ro.y-ns.y)**2);
+
+      if(Math.max(ln/rn, rn/ln)>3.3 || ln+rn<150){
+      }else{
+        this.setState( {look_count: this.state.look_count+1} );
+      }
+
+      // ランドマークをキャンバスに描画
+      //faceapi.draw.drawDetections(canvas, resizedDetection);
+    })/*.catch((error)=>{
+      console.log("Detected Error : " + error.message)
+    });*/
+  }
+}
 
   render() {
     //const play = (event) =>{
@@ -221,8 +254,11 @@ class AppMovie extends Component {
       <CssBaseline/><Container>
         <iframe width="800" height="600" loading = "lazy" src={this.full_url} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
         </iframe></Container>
-        <video id="webcam"></video>
-        <canvas id="snapshot"></canvas>
+        <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
+          (画面を見ている時間) {this.state.look_count} / {this.state.capture_count} (授業時間)
+        </Typography>
+        <video id="webcam" hidden></video>
+        <canvas id="snapshot" hidden></canvas>
         </div>
     );
   }
