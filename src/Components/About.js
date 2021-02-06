@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import { firestore } from '../lib/firebase.js';
-
+import { storage } from '../lib/firebase.js';
 const About = () => {
     // this.state.users これと同じ
     const [users, setUsers] = useState([])
@@ -20,18 +20,18 @@ const About = () => {
            age: `${index}`,
            name: 'hoge'
        });
-     }
-     //ライフサイクルが遷移するたびに呼ばれる
-      useEffect(() => {
+    }
+    //ライフサイクルが遷移するたびに呼ばれる
+    useEffect(() => {
         firestore.collection('users').onSnapshot((collection) => {
             const data = collection.docs.map(item => item.data());
             setUsers(data);
         })
-      }, [])
+    }, [])
 
-      useEffect(() => {
+    useEffect(() => {
         console.log(users)
-      }, [users])
+    }, [users])
 
     return (
         <div>
