@@ -76,7 +76,7 @@ const ChildPage =(props)=> {
   const Active_Time = [{value:500}, {value:200}]
 
   useEffect(() => {
-      firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',childid).get().then((d)=>{
+    firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',childid).get().then((d)=>{
           //何故かasyncが必須。
           let dx=d.docs.map(item=>item.data());
           dx.map(element=>{
@@ -123,6 +123,7 @@ const ChildPage =(props)=> {
           }));
 
       });
+
   }, []);
 
   const headCells = [
@@ -357,7 +358,24 @@ const ChildPage =(props)=> {
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, userLectures.length - page * rowsPerPage);
+
   const push_tag = (event,name) => {
+    if (!('Notification' in window)) {
+  alert('未対応のブラウザです');
+}
+    else {
+  // 許可を求める
+  Notification.requestPermission()
+    .then((permission) => {
+      if (permission == 'granted') {
+        // 許可
+      } else if (permission == 'denied') {
+        // 拒否
+      } else if (permission == 'default') {
+        // 無視
+      }
+    });
+}
     const title    = 'お子さんが授業を開始しました';
     const options  = {
       body : 'お子さんが授業「'+name+'」を開始しました',
@@ -487,7 +505,6 @@ const ChildPage =(props)=> {
             名前:{userName}のページ
           </Typography>
           <Route path='/ChildLogin' component={ChildLogin}/>
-
           {auth && (
             <div>
               <IconButton aria-label="account of current user" aria-controls="menu-appbar"aria-haspopup="true"onClick={handleMenu}color="inherit">

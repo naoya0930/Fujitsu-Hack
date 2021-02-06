@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Button from '@material-ui/core/Button';
 import Createicon from '@material-ui/icons/Create';
 import Select from '@material-ui/core/Select';
@@ -111,7 +111,7 @@ function DrawGraph(data, colors){
 class About extends React.Component {
   constructor(props) {
         super(props);
-        this.state = {lecture_name:null, lecture_id:null,lecture_subject:null,lecture_url:null,lec_id:null}
+        this.state = {lecture_name:null, lecture_id:null,lecture_subject:null,lecture_url:null,lec_id:null,add:''}
         this.handleChange = this.handleChange.bind(this)
 
         }
@@ -156,10 +156,10 @@ class About extends React.Component {
     ]
     const colors = ["#00FF00", "#0000FF"]
     const handleClick = (e,lecture_id,lecture_name,lecture_subject,lecture_url,lec_id) => {
-          console.log("wkjbwiuebkweckjwckbkcjbweiebce")
+          console.log("追加されました")
           firestore.collection('HackApp').doc('lectures').collection('lectures').doc().set({lecture_id:lecture_id,lecture_name:lecture_name,lecture_subject:lecture_subject,lecture_url:lecture_url})
+          this.setState({add:'「授業：'+lecture_name+'」が追加されました'})
         }
-
     return(
       <body>
       <div style={styles.div}>
@@ -268,7 +268,7 @@ class About extends React.Component {
         <Card variant="elevation" color="#000000" style={styles.mainCard}>
           <CardContent >
             <Typography color="textSecondary" gutterBottom>
-              授業追加{this.state.lecture_name}
+              授業追加
             </Typography>
             　<label for="name">授業ID</label>
             　<input type="classID" name="lecture_id" required="required" placeholder="授業ID" onChange={this.handleChange} value={this.state.lecture_id}></input>
@@ -282,7 +282,10 @@ class About extends React.Component {
             　<label for="name">URL</label>
             　<input type="url" name="lecture_url" required="required" placeholder="URL" onChange={this.handleChange} value={this.state.lecture_url}></input>
             　<p/>
-            　<Button variant="contained" color="primary" onClick={(event) => handleClick(event,this.state.lecture_id,this.state.lecture_name,this.state.lecture_subject,this.state.lecture_url)}>追加{this.add}</Button>
+            　<Button variant="contained" color="primary" onClick={(event) => handleClick(event,this.state.lecture_id,this.state.lecture_name,this.state.lecture_subject,this.state.lecture_url)}>追加</Button>
+            <Typography color="textSecondary" gutterBottom>
+              {this.state.add}
+            </Typography>
           </CardContent>
         </Card>
 

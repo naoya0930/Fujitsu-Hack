@@ -106,12 +106,12 @@ class AppMovie extends Component {
       }
   componentWillMount(){
     window.addEventListener("blur", this.onblur,false)
-    function winFocus(){
+    /*function winFocus(){
             window.focus();}
     /* ウィンドウの読み込み完了時 */
-    window.onload=winFocus;
+    /*window.onload=winFocus;
     /* ウィンドウからフォーカスが外れた時 */
-    window.onblur=winFocus;
+    //window.onblur=winFocus;
   }
   componentDidMount(){
     window.addEventListener("focus", this.onFocus,false)
