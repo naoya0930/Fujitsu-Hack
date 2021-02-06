@@ -48,7 +48,6 @@ const TeacherLogin=(props)=> {
         <div class="form-wrapper">
             <Container maxwidth="xl"><h1>先生ログインページ</h1></Container>
             <form>
-
                 <div>
                     <h3>名前</h3>
                     <label for="name"></label>

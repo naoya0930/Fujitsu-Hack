@@ -7,9 +7,8 @@ import { Link } from 'react-router-dom'
 import Typography from '@material-ui/core/Typography';
 import * as faceapi from 'face-api.js';
 import { createStyles, lighten, makeStyles, Theme } from '@material-ui/core/styles';
-
 import { firestorage } from '../lib/firebase.js';
-const {format} = require('util');
+import { firestore } from '../lib/firebase.js';
 
 const classes = makeStyles((theme) => ({
   root: {
@@ -41,15 +40,15 @@ async function setupModel(){
   };
 }
 
-
 class AppMovie extends Component {
   constructor(props) {
     super(props);
     this.u = "https://www.youtube.com/embed/"
-    this.full_url = this.u+this.props.location.state.url.slice(17)+"?autoplay=1&mute=1"
-    this.startTime = 0
-    this.endTime = 0
-    this.elapsedTime = 0
+    this.full_url = this.u+this.props.location.state.lecture_url.slice(17)+"?autoplay=1&mute=1"
+
+    this.startTime = null
+    this.endTime = null
+    this.elapsedTime = null
     this.state = {
       nowTime: '状態：アクティブかどうか判定します',
       capture_count: 0,
@@ -85,18 +84,20 @@ class AppMovie extends Component {
       }
   componentWillMount(){
     window.addEventListener("blur", this.onblur,false)
-    function winFocus(){
+    /*function winFocus(){
             window.focus();}
     /* ウィンドウの読み込み完了時 */
-    window.onload=winFocus;
+    /*window.onload=winFocus;
     /* ウィンドウからフォーカスが外れた時 */
-    window.onblur=winFocus;
+    //window.onblur=winFocus;
   }
   componentDidMount(){
     window.addEventListener("focus", this.onFocus,false)
     var snapshotCanvas = document.getElementById('snapshot');
     
     var video = document.getElementById('webcam');
+    this.pageStartTime = Date.now()
+    
     try{
       navigator.mediaDevices
       .getUserMedia({
@@ -116,6 +117,7 @@ class AppMovie extends Component {
       console.error('mediaDevice.getUserMedia() error:', error);
       return NaN;
     }
+    setupcamera();
   }
 
   onFocus = (event) => {
@@ -231,21 +233,33 @@ class AppMovie extends Component {
     //window.addEventListener('focus', play);
     // ウィンドウからフォーカスが外れたら指定した関数を実行
     //window.addEventListener('blur', pause);
-    const push_tag = (event) => {
-      const title    = 'お子さんが授業を終了しました';
+    const push_tag = (event,name) => {
+      const title    = '授業終了';
       const options  = {
-        body : 'お子さんが{授業名}の終了を始めました',
+        body : 'お子さんが授業「'+name+'」を終了をしました',
         icon : 'アイコン画像のパス',
         data : {foo : '任意のデータ'}
         };
       const notification = new Notification(title, options);
-      notification.addEventListener('click', (event) => {
-      console.dir(event);}, false);
+      notification.addEventListener('click', (event) => {console.dir(event);}, false);
+      this.pageEndTime = Date.now()
+      this.pageElapsedTime = this.pageEndTime-this.pageStartTime
+      this.activation = 1-(this.elapsedTime/this.pageElapsedTime)
+      console.log(this.props.location.state.user_id)
+      firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',this.props.location.state.user_id).get().then((e)=>{
+        e.docs.forEach((r) => r.ref.collection('lectures').where('lecture_id','==',this.props.location.state.lecture_id).get().then((ee)=>{
+          ee.docs.forEach((rr) => rr.ref.update({lecture_status:"2",user_activation:this.activation,user_concentration:20})
+        )
+      })
+      )});
+
       };
+
+
 
     return (
       <div>
-      <Link to="/ChildPage" onClick={push_tag}><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
+      <Link to="/ChildPage" onClick={(event) => push_tag(event,this.props.location.state.lecture_name)}><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
         戻る
       </Typography></Link>
       <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>

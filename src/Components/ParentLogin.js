@@ -42,8 +42,7 @@ const ParentLogin = (props) => {
                 }});
         });
     }
-
-
+    
     //render(){
     return (
         <div class="form-wrapper">
