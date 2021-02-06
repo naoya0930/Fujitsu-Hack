@@ -40,6 +40,17 @@ async function setupModel(){
   };
 }
 
+function stopStreamedVideo(videoElem) {
+  let stream = videoElem.srcObject;
+  let tracks = stream.getTracks();
+
+  tracks.forEach(function(track) {
+    track.stop();
+  });
+
+  videoElem.srcObject = null;
+}
+
 class AppMovie extends Component {
   constructor(props) {
     super(props);
@@ -270,6 +281,9 @@ class AppMovie extends Component {
       })
       )});
 
+      //カメラ停止
+      var video = document.getElementById('webcam');
+      stopStreamedVideo(video);
   };
 
 
