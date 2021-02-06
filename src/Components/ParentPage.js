@@ -1,10 +1,13 @@
 import React, { getInitialState, useEffect, useState } from 'react'
 import Button from '@material-ui/core/Button';
 import Createicon from '@material-ui/icons/Create';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Card from '@material-ui/core/Card';
+import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
@@ -14,6 +17,8 @@ import {PieChart, Pie, Cell} from 'recharts';
 
 import { firestore } from '../lib/firebase.js';
 import { assign } from 'lodash';
+
+import { firestorage } from '../lib/firebase.js';
 
 var styles = ({
   div:{
@@ -33,6 +38,7 @@ var styles = ({
     marginTop: 5,
     marginBottom: 5,
     borderWidth: 2,
+    width: '100%',
   },
   statusText:{
     fontWeight: 600,
@@ -79,38 +85,6 @@ var styles = ({
   },
 });
 
-
-function DrawGraph(data, colors){
-  let sum = 0;
-  data.map((entry, index) => {
-    sum += entry.value;
-  })
-
-  return (
-    <PieChart width={250} height={250}>
-      {/*}<text x={"50%"} y={"50%"} textAnchor="middle">{"50%"}</text>{/**/}
-
-      <text  x={"50%"} y={"52%"} fontSize={20} fontwewight={600} textAnchor="middle">
-      {Math.round(100*data[0].value/sum)} %
-      </text>
-      <Pie data={data}
-       cx="50%" cy="50%"
-       innerRadius={45}
-       outerRadius={80}
-       activeIndex={0}
-       startAngle={90}
-       endAngle={90-360}
-       >
-        {
-          data.map((entry, index) => (
-            <Cell key={entry.name} fill={colors[index]} label={{position: 'inside'}} />
-          ))
-        }
-      </Pie>
-    </PieChart>
-  );
-};
-
 const ParentPage =(props)=> {
     //TODO: undefined のときの処理
     const [childid,setChildid]=useState('user1');
@@ -125,36 +99,10 @@ const ParentPage =(props)=> {
 
     const colors = ["#00FF00", "#0000FF"];
 
-    const Concentration_Time = [
-      {
-        "name": "True",
-        "value": 400
-      },
-      {
-        "name": "False",
-        "value": 300
-      },
-    ]
-    const Gaze_Time = [
-      {
-        "name": "True",
-        "value": 200
-      },
-      {
-        "name": "False",
-        "value": 500
-      },
-    ]
-    const Active_Time = [
-      {
-        "name": "True",
-        "value": 500
-      },
-      {
-        "name": "False",
-        "value": 200
-      },
-    ]
+    const Concentration_Time = [{value:400}, {value:300}]
+    const Gaze_Time = [{value:200}, {value:500}]
+    const Active_Time = [{value:500}, {value:200}]
+
     useEffect(() => {
         firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',childid).get().then((d)=>{
             //何故かasyncが必須。
@@ -196,7 +144,55 @@ const ParentPage =(props)=> {
             }));
         });
     }, []);
+    
+    function DrawGraph(data, colors){
+      let sum = 0;
+      data.map((entry, index) => {
+        sum += entry.value;
+      })
 
+      return (
+        <PieChart width={250} height={250}>
+          {/*}<text x={"50%"} y={"50%"} textAnchor="middle">{"50%"}</text>{/**/}
+
+          <text  x={"50%"} y={"52%"} fontSize={20} fontwewight={600} textAnchor="middle">
+          {Math.round(100*data[0].value/sum)} %
+          </text>
+          <Pie data={data}
+          cx="50%" cy="50%"
+          innerRadius={45}
+          outerRadius={80}
+          activeIndex={0}
+          startAngle={90}
+          endAngle={90-360}
+          >
+            {
+              data.map((entry, index) => (
+                <Cell key={entry.name} fill={colors[index]} label={{position: 'inside'}} />
+              ))
+            }
+          </Pie>
+        </PieChart>
+      );
+    };
+
+    function chialdname_change(event){
+      var new_child = event.target.value;
+    };
+
+    function requestChildImage(){
+      var storageRef = firestorage.ref();
+      var img = document.getElementById('childimage');
+      img.hidden = !img.hidden;
+      storageRef.child('mountains.jpg').getDownloadURL().then(function(url){
+        img.src = url;
+      }).catch( function (error) {
+        console.log("Firestorage Image GET and Show : " + error.message)
+        //強制非表示
+        img.hidden = false;
+        img.src = "";
+      }); 
+    };
 
     return(
       <body>
@@ -206,25 +202,30 @@ const ParentPage =(props)=> {
         ログインページにもどる
       </Typography></Link>
         <br/>
-        <Select
-          labelId="demo-simple-select-filled"
-          id="demo-simple-select-filled"
-          value={""}
-          label="Age"
-          variant="filled"
-          style={styles.formControl}
-          //onChange={handleChange}
-        >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          <MenuItem value={10}>Ten</MenuItem>
-          <MenuItem value={20}>Twenty</MenuItem>
-          <MenuItem value={30}>Thirty</MenuItem>
-        </Select>
-        <p class="alert alert-danger" style={styles.status}>
+        <FormControl variant="filled" style={styles.formControl}>
+          <InputLabel id="child-select-label">名前</InputLabel>
+            <Select
+              labelId="child-select-label"
+              id="child-select"
+              value={""}
+              variant="filled"
+              style={styles.formControl}
+              onChange={chialdname_change}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value={10}>Ten</MenuItem>
+              <MenuItem value={20}>Twenty</MenuItem>
+              <MenuItem value={30}>Thirty</MenuItem>
+            </Select>
+        </FormControl>
+        <Button class="alert alert-danger" style={styles.status} onClick={requestChildImage}>
           <h2 style={styles.statusText}><Createicon/>授業中</h2>
-        </p>
+        </Button>
+        <Card variant="elevation" style={styles.mainCard}>
+          <CardMedia component="img" id="childimage" hidden></CardMedia>
+        </Card>
         {/*
         <Box class="border rounded" style={styles.classNow}>
           <h2 style={styles.classText}>数学</h2>
