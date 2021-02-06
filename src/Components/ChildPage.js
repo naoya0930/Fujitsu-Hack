@@ -56,46 +56,85 @@ const classes = makeStyles((theme) => ({
   },
 }));
 
-function createData(id, classname, subject, url, status) {
-  return { id, classname, subject, url, status };
+const ChildPage =(props)=> {
+  const createData = (lecture_id, lecture_name, lecture_subject, lecture_url, lecture_status) =>  {
+  return { lecture_id, lecture_name, lecture_subject, lecture_url, lecture_status };
   }
+  const [childid,setChildid]=useState('user1');
+      /*=useState(typeof props.location.state.user_id);*/
+  const [userId, setUserId]=useState('');
+  const [userName, setUserName]=useState('');
+  const [userLectures, setUserLectures]=useState([]);
+  const [userEndLecture, setUserEndLecture]=useState([]);
+  const [userNowLecture, setUserNowLecture]=useState([]);
+  const [userFutureLecture, setUserFutureLecture]=useState([]);
+  const [userLecturesstr, setUserLecturesstr]=useState([]);
 
-const rows = [
-  createData(1,'数1A','数学','https://youtu.be/G9JlVSA7Vtc','授業中'),
-  createData(2,'基礎英語','英語','https://youtu.be/G9JlVSA7Vtc','授業中'),
-  createData(3,'漢文','国語', 'https://youtu.be/G9JlVSA7Vtc' ,'授業前'),
-  createData(4,'道徳','道徳','https://youtu.be/G9JlVSA7Vtc','授業終了'),
-  createData(5,'生物基礎', '理科','https://youtu.be/G9JlVSA7Vtc','授業中'),
-  createData(6,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
-  createData(7,'数1A','数学','https://youtu.be/G9JlVSA7Vtc','授業終了'),
-  createData(8,'基礎英語','英語','https://youtu.be/G9JlVSA7Vtc','授業中'),
-  createData(9,'漢文','国語', 'https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
-  createData(10,'道徳','道徳','https://youtu.be/G9JlVSA7Vtc','授業中'),
-  createData(11,'生物基礎', '理科','https://youtu.be/G9JlVSA7Vtc','授業中'),
-  createData(12,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業終了'),
-  createData(13,'数1A','数学','https://youtu.be/G9JlVSA7Vtc5','授業中'),
-  createData(14,'基礎英語','英語','https://youtu.be/G9JlVSA7Vtc','授業中'),
-  createData(15,'漢文','国語', 'https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
-  createData(16,'道徳','道徳','https://youtu.be/G9JlVSA7Vtc','授業前'),
-  createData(17,'生物基礎', '理科','https://youtu.be/G9JlVSA7Vtc','授業中'),
-  createData(18,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
-  createData(19,'数1A','数学','https://youtu.be/G9JlVSA7Vtc','授業中'),
-  createData(20,'基礎英語','英語','https://youtu.be/G9JlVSA7Vtc','授業中'),
-  createData(21,'漢文','国語', 'https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
-  createData(22,'道徳','道徳','https://youtu.be/G9JlVSA7Vtc','授業中'),
-  createData(23,'生物基礎', '理科','https://youtu.be/G9JlVSA7Vtc','授業中'),
-  createData(24,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
+  const colors = ["#00FF00", "#0000FF"];
+
+  const Concentration_Time = [{value:400}, {value:300}]
+  const Gaze_Time = [{value:200}, {value:500}]
+  const Active_Time = [{value:500}, {value:200}]
+
+  useEffect(() => {
+      firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',childid).get().then((d)=>{
+          //何故かasyncが必須。
+          let dx=d.docs.map(item=>item.data());
+          dx.map(element=>{
+              //console.log(childid);
+              //console.log(element.user_id);
+              setUserId(element.user_id);
+              setUserName(element.user_name);
+              //const data = element.lectures.map((item)=>{item.data()});
+              //setUserLectures(data);
+          });
+          d.docs.forEach(item=>item.ref.collection('lectures').onSnapshot((coll)=>{
+              let data=coll.docs.map(item=>item.data());
+              //console.log(data);
+              //終わった授業などを仕分け
+              let lecture_status_str=[];
+              let x=[];
+              let y=[];
+              let z=[];
+              data.forEach((item)=>{
+                  if(item.lecture_status==='0'){
+                      //今受けている
+                      x.push(item);
+                      lecture_status_str.push("授業中1")
+                      //setUserEndLecture(x);
+                  }else if(item.lecture_status==='1'){
+                      //未来の授業
+                      y.push(item);
+                      lecture_status_str.push("授業中2")
+                      //setUserNowLecture(userNowLecture.push(item.data()));
+                  }else{
+                      //過去の授業
+                      z.push(item);
+                      lecture_status_str.push("授業中3")
+                      //setUserFutureLecture(userFutureLecture.push(item.data()));
+                  }
+              })
+              setUserEndLecture(z);
+              setUserNowLecture(x);
+              setUserFutureLecture(y);
+              setUserLectures(data);
+              setUserLecturesstr(lecture_status_str);
+
+              　//全部のデータ入ってる
+          }));
+
+      });
+  }, []);
+
+  const headCells = [
+  { id: 'lecture_id', numeric: false, disablePadding: true, label: '授業ID' },
+  { id: 'lecture_name', numeric: true, disablePadding: false, label: '授業名' },
+  { id: 'lecture_subject', numeric: true, disablePadding: false, label: '教科' },
+  { id: 'lecture_url', numeric: false, disablePadding: false, label: '授業URL' },
+  { id: 'lecture_status2', numeric: true, disablePadding: false, label: '履修状況' },
 ];
 
-const headCells = [
-  { id: 'id', numeric: false, disablePadding: true, label: '授業ID' },
-  { id: 'classname', numeric: true, disablePadding: false, label: '授業名' },
-  { id: 'subject', numeric: true, disablePadding: false, label: '教科' },
-  { id: 'url', numeric: false, disablePadding: false, label: '授業URL' },
-  { id: 'status', numeric: true, disablePadding: false, label: '履修状況' },
-];
-
-function descendingComparator(a, b, orderBy) {
+  const descendingComparator = (a, b, orderBy) => {
   if (b[orderBy] < a[orderBy]) {
     return -1;
   }
@@ -105,13 +144,13 @@ function descendingComparator(a, b, orderBy) {
   return 0;
 }
 
-function getComparator(order, orderBy) {
+  const getComparator = (order, orderBy) => {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-function stableSort(array, comparator) {
+  const stableSort = (array, comparator) => {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -121,7 +160,7 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-function EnhancedTableHead(props) {
+  const EnhancedTableHead = (props) => {
   const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
@@ -164,7 +203,7 @@ function EnhancedTableHead(props) {
   );
 }
 
-EnhancedTableHead.propTypes = {
+  EnhancedTableHead.propTypes = {
   classes: PropTypes.object.isRequired,
   numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
@@ -174,7 +213,7 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-const useToolbarStyles = makeStyles((theme) => ({
+  const useToolbarStyles = makeStyles((theme) => ({
   root: {
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(1),
@@ -194,7 +233,7 @@ const useToolbarStyles = makeStyles((theme) => ({
   },
 }));
 
-const EnhancedTableToolbar = (props) => {
+  const EnhancedTableToolbar = (props) => {
   const classes = useToolbarStyles();
   const { numSelected } = props;
 
@@ -231,11 +270,11 @@ const EnhancedTableToolbar = (props) => {
   );
 };
 
-EnhancedTableToolbar.propTypes = {
+  EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-const useStyles = makeStyles((theme) => ({
+  const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
   },
@@ -259,10 +298,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function EnhancedTable() {
+  const EnhancedTable = () => {
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('calories');
+  const [orderBy, setOrderBy] = React.useState('');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
@@ -276,7 +315,7 @@ function EnhancedTable() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.name);
+      const newSelecteds = userLectures.map((n) => n.name);
       setSelected(newSelecteds);
       return;
     }
@@ -318,20 +357,18 @@ function EnhancedTable() {
 
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
-  const push_tag = (event) => {
+  const emptyRows = rowsPerPage - Math.min(rowsPerPage, userLectures.length - page * rowsPerPage);
+  const push_tag = (event,name) => {
     const title    = 'お子さんが授業を開始しました';
     const options  = {
-      body : 'お子さんが{授業名}の受講を始めました',
+      body : 'お子さんが授業「'+name+'」を開始しました',
       icon : 'アイコン画像のパス',
       data : {foo : '任意のデータ'}
       };
     const notification = new Notification(title, options);
     notification.addEventListener('click', (event) => {
     console.dir(event);}, false);
-    };
-
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-
+  };
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
@@ -350,23 +387,23 @@ function EnhancedTable() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={userLectures.length}
             />
             <TableBody>
-              {stableSort(rows, getComparator(order, orderBy))
+              {stableSort(userLectures, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
-                  const isItemSelected = isSelected(row.id);
+                  const isItemSelected = isSelected(row.lecture_id);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.id)}
+                      onClick={(event) => handleClick(event, row.lecture_id)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
-                      key={row.id}
+                      key={row.lecture_id}
                       selected={isItemSelected}
                     >
                       <TableCell padding="checkbox">
@@ -376,16 +413,21 @@ function EnhancedTable() {
                         />
                       </TableCell>
                       <TableCell component="th" id={labelId} scope="row" padding="none">
-                        {row.id}
+                        {row.lecture_id}
                       </TableCell>
-                      <TableCell align="right">{row.classname}</TableCell>
-                      <TableCell align="right">{row.subject}</TableCell>
+                      <TableCell align="right">{row.lecture_name}</TableCell>
+                      <TableCell align="right">{row.lecture_subject}</TableCell>
                       <Link to={{
                       pathname: '/Movie',
-                      state: {url:row.url},
+                      state: {
+                        lecture_url:row.lecture_url,
+                        lecture_name:row.lecture_name,
+                        lecture_id:row.lecture_id,
+                        user_id:userId
+                      },
                       }}>
-                      <TableCell align="right" onClick={push_tag}>{row.url}</TableCell></Link>
-                      <TableCell align="right">{row.status}</TableCell>
+                      <TableCell align="right" onClick= {(event) => push_tag(event, row.lecture_name)}>{row.lecture_url}</TableCell></Link>
+                      <TableCell align="right" >{row.lecture_status}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -400,7 +442,7 @@ function EnhancedTable() {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.length}
+          count={userLectures.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={handleChangePage}
@@ -415,20 +457,20 @@ function EnhancedTable() {
   );
 }
 //MenuAppBarの関数
-function MenuAppBar() {
-  const classes = styled();
-  const [auth, setAuth] = React.useState(true);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAuth(event.target.checked);
-  };
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const MenuAppBar = () => {
+    const classes = styled();
+    const [auth, setAuth] = React.useState(true);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setAuth(event.target.checked);
+    };
+    const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+      setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
 
   return (
     <div className={classes.root}>
@@ -445,11 +487,7 @@ function MenuAppBar() {
           <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'100%',fontSize: "24px"}}>
             名前:
           </Typography>
-          <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "24px"}}>
-            パスワード:
-          </Typography>
           <Route path='/ChildLogin' component={ChildLogin}/>
-
 
           {auth && (
             <div>
@@ -479,118 +517,6 @@ function MenuAppBar() {
     </div>
   );
 }
-//Table表示の関数
-/*
-function Tab() {
-  const columns: ColDef[] = [
-  {field: 'id', headerName: '授業ID', width: 150 },
-  {field: 'classname', headerName: '授業名', width: 150 },
-  {field: 'subject', headerName: '教科', width: 130 },
-  {field: 'url',headerName: '授業URL',width: 500,},
-  {field: 'status',headerName: '履修状況',width: 150,},
-      ];
-  const rows = [
-    { id: 1, classname: '数1A', subject: '数学', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 2, classname: '基礎英語', subject: '英語', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',status: '授業中'  },
-    { id: 3, classname: '漢文', subject: '国語', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 4, classname: '道徳', subject: '道徳', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',status: '授業中'  },
-    { id: 5, classname: '生物基礎', subject: '理科', url: null ,status: '授業中' },
-    { id: 6, classname: '地理', subject: '社会', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 7, classname: '数1A', subject: '数学', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 8, classname: '基礎英語', subject: '英語', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',status: '授業中'  },
-    { id: 9, classname: '漢文', subject: '国語', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 10, classname: '道徳', subject: '道徳', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',status: '授業中'  },
-    { id: 11, classname: '生物基礎', subject: '理科', url: null ,status: '授業中' },
-    { id: 12, classname: '地理', subject: '社会', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 13, classname: '数1A', subject: '数学', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 14, classname: '基礎英語', subject: '英語', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',status: '授業中'  },
-    { id: 15, classname: '漢文', subject: '国語', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 16, classname: '道徳', subject: '道徳', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',status: '授業中'  },
-    { id: 17, classname: '生物基礎', subject: '理科', url: null ,status: '授業中' },
-    { id: 18, classname: '地理', subject: '社会', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 19, classname: 'Clifford', subject: 'Ferrara', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 20, classname: 'Frances', subject: 'Rossini', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5' ,status: '授業中' },
-    { id: 21, classname: 'Roxie', subject: 'Harvey', url: 'https://qiita.com/niwango/items/456e2854288dd16fbab5',　status: '授業中'  },
-  ];
-  return (
-    <div style={{ height: 400, width: '100%' }}>
-      <DataGrid rows={rows} columns={columns} pageSize={10}/>
-    </div>
-  );
-}
-*/
-
-const ChildPage =(props)=> {
-    //TODO: userIDはpropsで
-    const [childid,setChildid]=useState('user1');
-    const [userId, setUserId]=useState('');
-    const [userName, setUserName]=useState('');
-    const [userLectures, setUserLectures]=useState([]);
-    const [userEndLecture, setUserEndLecture]=useState([]);
-    const [userNowLecture, setUserNowLecture]=useState([]);
-    const [userFutureLecture, setUserFutureLecture]=useState([]);
-    useEffect(() => {
-        firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',childid).get().then((d)=>{
-            let dx=d.docs.map(item=>item.data());
-            dx.map(element=>{
-                setUserId(element.user_id);
-                setUserName(element.user_name);
-            });
-            d.docs.forEach(item=>item.ref.collection('lectures').onSnapshot((coll)=>{
-                let data=coll.docs.map(item=>item.data());
-                //終わった授業などを仕分け
-                let x=[];
-                let y=[];
-                let z=[];
-                data.forEach((item)=>{
-                    if(item.lecture_status==='0'){
-                        //今受けている
-                        x.push(item);
-                    }else if(item.lecture_status==='1'){
-                        //未来の授業
-                        y.push(item);
-                    }else{
-                        //過去の授業
-                        z.push(item);
-                    }
-                })
-                setUserEndLecture(z);
-                setUserNowLecture(x);
-                setUserFutureLecture(y);
-                setUserLectures(data);  //全データが入ってる
-            }));
-        });
-    }, []);
-    function createData(id, classname, subject, url, status) {
-        return { id, classname, subject, url, status };
-        }
-      
-      const rows = [
-        createData(1,'数1A','数学','https://youtu.be/G9JlVSA7Vtc','授業中'),
-        createData(2,'基礎英語','英語','https://youtu.be/G9JlVSA7Vtc','授業中'),
-        createData(3,'漢文','国語', 'https://youtu.be/G9JlVSA7Vtc' ,'授業前'),
-        createData(4,'道徳','道徳','https://youtu.be/G9JlVSA7Vtc','授業終了'),
-        createData(5,'生物基礎', '理科','https://youtu.be/G9JlVSA7Vtc','授業中'),
-        createData(6,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
-        createData(7,'数1A','数学','https://youtu.be/G9JlVSA7Vtc','授業終了'),
-        createData(8,'基礎英語','英語','https://youtu.be/G9JlVSA7Vtc','授業中'),
-        createData(9,'漢文','国語', 'https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
-        createData(10,'道徳','道徳','https://youtu.be/G9JlVSA7Vtc','授業中'),
-        createData(11,'生物基礎', '理科','https://youtu.be/G9JlVSA7Vtc','授業中'),
-        createData(12,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業終了'),
-        createData(13,'数1A','数学','https://youtu.be/G9JlVSA7Vtc5','授業中'),
-        createData(14,'基礎英語','英語','https://youtu.be/G9JlVSA7Vtc','授業中'),
-        createData(15,'漢文','国語', 'https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
-        createData(16,'道徳','道徳','https://youtu.be/G9JlVSA7Vtc','授業前'),
-        createData(17,'生物基礎', '理科','https://youtu.be/G9JlVSA7Vtc','授業中'),
-        createData(18,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
-        createData(19,'数1A','数学','https://youtu.be/G9JlVSA7Vtc','授業中'),
-        createData(20,'基礎英語','英語','https://youtu.be/G9JlVSA7Vtc','授業中'),
-        createData(21,'漢文','国語', 'https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
-        createData(22,'道徳','道徳','https://youtu.be/G9JlVSA7Vtc','授業中'),
-        createData(23,'生物基礎', '理科','https://youtu.be/G9JlVSA7Vtc','授業中'),
-        createData(24,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
-      ];
 
     return(
       <div>
