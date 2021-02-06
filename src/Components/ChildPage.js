@@ -362,9 +362,8 @@ const ChildPage =(props)=> {
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, userLectures.length - page * rowsPerPage);
   const push_tag = (event) => {
     const title    = 'お子さんが授業を開始しました';
-    const bodybody = 'お子さんが授業を開始しました';
     const options  = {
-      body : bodybody,
+      body : 'お子さんが授業を開始しました',
       icon : 'アイコン画像のパス',
       data : {foo : '任意のデータ'}
       };

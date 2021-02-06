@@ -42,7 +42,7 @@ function setupcamera(){
     return;
   });
 }
-    
+
 function snapshot(video, canvas, stream){
   var ctx = canvas.getContext('2d');
   canvas.width =video.videoWidth;
@@ -61,12 +61,12 @@ function snapshot(video, canvas, stream){
   canvas.toBlob(function(blob) {
     var img = document.createElement('image');
     img.srcObject = stream;
-    
+
     mountainsRef.put(blob).then(function(img) {
       console.log('Uploaded a blob or file!');
     });
   }, 'image/jpeg', 0.95);
-  
+
 }
 
 class AppMovie extends Component {
@@ -117,6 +117,7 @@ class AppMovie extends Component {
   componentDidMount(){
     window.addEventListener("focus", this.onFocus,false)
     setupcamera();
+    this.pageStartTime = Date.now()
   }
 
   onFocus = (event) => {
@@ -157,15 +158,17 @@ class AppMovie extends Component {
     // ウィンドウからフォーカスが外れたら指定した関数を実行
     //window.addEventListener('blur', pause);
     const push_tag = (event) => {
-      const title    = 'お子さんが授業を終了しました';
+      const title    = '授業終了';
       const options  = {
-        body : 'お子さんが{授業名}の終了を始めました',
+        body : 'お子さんが授業を終了をしました',
         icon : 'アイコン画像のパス',
         data : {foo : '任意のデータ'}
         };
       const notification = new Notification(title, options);
-      notification.addEventListener('click', (event) => {
-      console.dir(event);}, false);
+      notification.addEventListener('click', (event) => {console.dir(event);}, false);
+      this.pageEndTime = Date.now()
+      this.pageElapsedTime = this.pageEndTime-this.pageStartTime
+      const activation = this.elapsedTime/this.pageElapsedTime
       };
 
     return (
