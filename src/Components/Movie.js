@@ -183,7 +183,7 @@ class AppMovie extends Component {
     return (
       <div>
       <Link to="/ChildPage" onClick={(event) => push_tag(event,this.props.location.state.lecture_name)}><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
-        戻る{this.props.location.state.user_id}
+        戻る
       </Typography></Link>
       <Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
         日時:{this.state.nowTime}　非アクティブだった合計時間(秒){this.elapsedTime/1000}
