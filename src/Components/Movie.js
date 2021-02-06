@@ -55,6 +55,7 @@ class AppMovie extends Component {
       look_count: 0,
     };
 
+    this.useCamera = true;
     this.video = document.getElementById('webcam');
     this.canvas = document.getElementById('snapshot');
 
@@ -71,6 +72,7 @@ class AppMovie extends Component {
     let hours = nowTime.getHours()
     let minutes = nowTime.getMinutes()
     let seconds = nowTime.getSeconds()
+
 
     if (hours < 10) hours = `0${hours}`
     if (minutes < 10) minutes = `0${minutes}`
@@ -97,7 +99,7 @@ class AppMovie extends Component {
     
     var video = document.getElementById('webcam');
     this.pageStartTime = Date.now()
-    
+
     try{
       navigator.mediaDevices
       .getUserMedia({
@@ -109,15 +111,15 @@ class AppMovie extends Component {
         video.play();
         setTimeout(() => {
           this.snapshot(video, snapshotCanvas, stream);
-          //10秒に一回カウント
-          this.intervalID = setInterval(() => {this.onTimerSnspshot(video, snapshotCanvas, stream)},10000,);
+          //1秒に一回カウント
+          this.intervalID = setInterval(() => {this.onTimerSnspshot(video, snapshotCanvas, stream)},1000,);
         }, 3000);
       });
     }catch(error){
       console.error('mediaDevice.getUserMedia() error:', error);
+      this.useCamera = false; //カメラ処理を飛ばす
       return NaN;
     }
-    setupcamera();
   }
 
   onFocus = (event) => {
@@ -141,6 +143,9 @@ class AppMovie extends Component {
   }
 
   snapshot(video, canvas, stream){ 
+    if(!this.useCamera)
+      return;
+
   var ctx =  canvas.getContext('2d'); 
   canvas.width =video.videoWidth;
   canvas.height =video.videoHeight;
@@ -166,54 +171,58 @@ class AppMovie extends Component {
 }
 
   onTimerSnspshot(video, canvas, stream){
-  var txt = document.getElementById("text")
-  var txt2 = document.getElementById("text2")
-  canvas.width =video.videoWidth;
-  canvas.height =video.videoHeight;
-  var w = canvas.width;
-  var h = canvas.height;
-  //  webカメラの映像から顔認識を行う
-  if(FaceModel_loaded){
-  const useTinyModel = true;
-  faceapi.detectSingleFace(
-      video,
-      new faceapi.TinyFaceDetectorOptions({
-      inputSize: 160,
-      scoreThreshold: SCORE_THRESHHOLD
-      })
-    ).withFaceLandmarks(useTinyModel)
-    .then((detection)=>{
-      this.setState( {capture_count: this.state.capture_count+1} );
-      if(!detection){
-        return
-      }
-      // 認識データをリサイズ
-      const resizedDetection = faceapi.resizeResults(detection, {
-        width: w,
-        height: h,
-      })
+    if(!this.useCamera)
+      return;
+    var txt = document.getElementById("text")
+    var txt2 = document.getElementById("text2")
+    canvas.width =video.videoWidth;
+    canvas.height =video.videoHeight;
+    var w = canvas.width;
+    var h = canvas.height;
+    //  webカメラの映像から顔認識を行う
+    if(FaceModel_loaded){
+    const useTinyModel = true;
+    faceapi.detectSingleFace(
+        video,
+        new faceapi.TinyFaceDetectorOptions({
+        inputSize: 160,
+        scoreThreshold: SCORE_THRESHHOLD
+        })
+      ).withFaceLandmarks(useTinyModel)
+      .then((detection)=>{
+        this.setState( {capture_count: this.state.capture_count+1} );
+        if(!detection){
+          return
+        }
+        // 認識データをリサイズ
+        const resizedDetection = faceapi.resizeResults(detection, {
+          width: w,
+          height: h,
+        })
 
-      
-      var landmarks = resizedDetection.landmarks;
-      
-      var ns = landmarks.getNose()[3];
-      var lo = landmarks.getJawOutline()[0];  //左頬
-      var ro = landmarks.getJawOutline()[16]; //右頬
+        
+        var landmarks = resizedDetection.landmarks;
+        
+        //ランドマークのカメラ位置を取得
+        var ns = landmarks.getNose()[3];        //鼻
+        var lo = landmarks.getJawOutline()[0];  //左頬
+        var ro = landmarks.getJawOutline()[16]; //右頬
 
-      var ln = Math.sqrt((lo.x-ns.x)**2+(lo.y-ns.y)**2);
-      var rn = Math.sqrt((ro.x-ns.x)**2+(ro.y-ns.y)**2);
+        //距離取得
+        var ln = Math.sqrt((lo.x-ns.x)**2+(lo.y-ns.y)**2); //鼻-左頬
+        var rn = Math.sqrt((ro.x-ns.x)**2+(ro.y-ns.y)**2); //鼻-右頬
 
-      if(Math.max(ln/rn, rn/ln)>3.3 || ln+rn<150){
-      }else{
-        this.setState( {look_count: this.state.look_count+1} );
-      }
+        if(Math.max(ln/rn, rn/ln)>3.3 || ln+rn<150){
+        }else{
+          this.setState( {look_count: this.state.look_count+1} );
+        }
 
-      // ランドマークをキャンバスに描画
-      //faceapi.draw.drawDetections(canvas, resizedDetection);
-    })/*.catch((error)=>{
-      console.log("Detected Error : " + error.message)
-    });*/
-  }
+        // ランドマークをキャンバスに描画
+        //faceapi.draw.drawDetections(canvas, resizedDetection);
+      })/*.catch((error)=>{
+        console.log("Detected Error : " + error.message)
+      });*/
+    }
 }
 
   render() {
@@ -246,14 +255,22 @@ class AppMovie extends Component {
       this.pageElapsedTime = this.pageEndTime-this.pageStartTime
       this.activation = 1-(this.elapsedTime/this.pageElapsedTime)
       console.log(this.props.location.state.user_id)
+      var user_concentration_rate = 100*(this.activation)
+      if(this.state.capture_count > 10)
+        user_concentration_rate = 100*(this.activation + (this.state.look_count/this.state.capture_count))/2.0
       firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',this.props.location.state.user_id).get().then((e)=>{
         e.docs.forEach((r) => r.ref.collection('lectures').where('lecture_id','==',this.props.location.state.lecture_id).get().then((ee)=>{
-          ee.docs.forEach((rr) => rr.ref.update({lecture_status:"2",user_activation:this.activation,user_concentration:20})
+          ee.docs.forEach((rr) => rr.ref.update({
+            lecture_status:"2",
+            user_activation:this.activation,
+            user_concentration:user_concentration_rate,
+            look_count : this.state.look_count,
+            capture_count : this.state.capture_count,})
         )
       })
       )});
 
-      };
+  };
 
 
 
