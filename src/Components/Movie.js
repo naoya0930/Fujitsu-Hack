@@ -5,6 +5,7 @@ import Container from '@material-ui/core/Container';
 import { withRouter } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import Typography from '@material-ui/core/Typography';
+import * as faceapi from 'face-api.js';
 import { createStyles, lighten, makeStyles, Theme } from '@material-ui/core/styles';
 
 import { firestorage } from '../lib/firebase.js';
@@ -24,6 +25,15 @@ const classes = makeStyles((theme) => ({
   },
 }));
 
+let FaceModel_loaded = false;
+
+async function setupModel(){
+  await faceapi.nets.tinyFaceDetector.load("/")
+  
+  console.log("MODEL_SETUP_FINISH")
+  FaceModel_loaded = true
+}
+
 function setupcamera(){
   var video = document.getElementById('webcam');
   var snapshotCanvas = document.getElementById('snapshot');
@@ -35,8 +45,11 @@ function setupcamera(){
   }).then(function(stream) {
     video.srcObject = stream;
     video.play();
-    setTimeout(function(){ snapshot(video, snapshotCanvas, stream);}, 1000);
-    //setInterval(function(){snapshot(video, snapshotCanvas, stream);},1000000);
+    setTimeout(function(){ 
+      snapshot(video, snapshotCanvas, stream);
+      //60秒に一回送信
+      setInterval(function(){snapshot(video, snapshotCanvas, stream);},5000);
+    }, 1000);
   }).catch(function (error) {
     console.error('mediaDevice.getUserMedia() error:', error);
     return;
@@ -44,11 +57,38 @@ function setupcamera(){
 }
     
 function snapshot(video, canvas, stream){
+  
   var ctx = canvas.getContext('2d');
   canvas.width =video.videoWidth;
   canvas.height =video.videoHeight;
   var w = canvas.width;
   var h = canvas.height;
+  //  webカメラの映像から顔認識を行う
+  if(FaceModel_loaded){
+  const useTinyModel = true;
+  faceapi.detectSingleFace(
+      video,
+      new faceapi.TinyFaceDetectorOptions({
+      inputSize: 160,
+      })
+    ).then((detection)=>{
+      if(w<=0 || h<=0)
+        return;
+      console.log(w,h)
+      console.log("DETECT")
+      // 認識データをリサイズ
+      const resizedDetection = faceapi.resizeResults(detection, {
+        width: w,
+        height: h,
+      });
+
+      // ランドマークをキャンバスに描画
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      faceapi.draw.drawDetections(canvas, resizedDetection);
+    }).catch((error)=>{
+      console.log(error.message())
+    });
+  }
   ctx.drawImage(video, 0, 0, w, h);
 
   console.log(w,h);
@@ -83,6 +123,8 @@ class AppMovie extends Component {
 
     this.video = document.getElementById('webcam');
     this.canvas = document.getElementById('snapshot');
+
+    setupModel();
   }
 
   getTime(timelag = 0) {
@@ -179,8 +221,8 @@ class AppMovie extends Component {
       <CssBaseline/><Container>
         <iframe width="800" height="600" loading = "lazy" src={this.full_url} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
         </iframe></Container>
-        <video id="webcam" hidden></video>
-        <canvas id="snapshot" hidden></canvas>
+        <video id="webcam"></video>
+        <canvas id="snapshot"></canvas>
         </div>
     );
   }
