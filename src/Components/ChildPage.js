@@ -1,5 +1,4 @@
-import React from 'react'
-import {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import Button from '@material-ui/core/Button'
 import { styled } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -39,6 +38,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
+
+import { firestore } from '../lib/firebase.js';
 
 const classes = makeStyles((theme) => ({
   root: {
@@ -479,6 +480,7 @@ function MenuAppBar() {
   );
 }
 //Table表示の関数
+/*
 function Tab() {
   const columns: ColDef[] = [
   {field: 'id', headerName: '授業ID', width: 150 },
@@ -516,13 +518,80 @@ function Tab() {
     </div>
   );
 }
+*/
 
-class About extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {names:null}
-    }
-  render(){
+const ChildPage =(props)=> {
+    //TODO: userIDはpropsで
+    const [childid,setChildid]=useState('user1');
+    const [userId, setUserId]=useState('');
+    const [userName, setUserName]=useState('');
+    const [userLectures, setUserLectures]=useState([]);
+    const [userEndLecture, setUserEndLecture]=useState([]);
+    const [userNowLecture, setUserNowLecture]=useState([]);
+    const [userFutureLecture, setUserFutureLecture]=useState([]);
+    useEffect(() => {
+        firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',childid).get().then((d)=>{
+            let dx=d.docs.map(item=>item.data());
+            dx.map(element=>{
+                setUserId(element.user_id);
+                setUserName(element.user_name);
+            });
+            d.docs.forEach(item=>item.ref.collection('lectures').onSnapshot((coll)=>{
+                let data=coll.docs.map(item=>item.data());
+                //終わった授業などを仕分け
+                let x=[];
+                let y=[];
+                let z=[];
+                data.forEach((item)=>{
+                    if(item.lecture_status==='0'){
+                        //今受けている
+                        x.push(item);
+                    }else if(item.lecture_status==='1'){
+                        //未来の授業
+                        y.push(item);
+                    }else{
+                        //過去の授業
+                        z.push(item);
+                    }
+                })
+                setUserEndLecture(z);
+                setUserNowLecture(x);
+                setUserFutureLecture(y);
+                setUserLectures(data);  //全データが入ってる
+            }));
+        });
+    }, []);
+    function createData(id, classname, subject, url, status) {
+        return { id, classname, subject, url, status };
+        }
+      
+      const rows = [
+        createData(1,'数1A','数学','https://youtu.be/G9JlVSA7Vtc','授業中'),
+        createData(2,'基礎英語','英語','https://youtu.be/G9JlVSA7Vtc','授業中'),
+        createData(3,'漢文','国語', 'https://youtu.be/G9JlVSA7Vtc' ,'授業前'),
+        createData(4,'道徳','道徳','https://youtu.be/G9JlVSA7Vtc','授業終了'),
+        createData(5,'生物基礎', '理科','https://youtu.be/G9JlVSA7Vtc','授業中'),
+        createData(6,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
+        createData(7,'数1A','数学','https://youtu.be/G9JlVSA7Vtc','授業終了'),
+        createData(8,'基礎英語','英語','https://youtu.be/G9JlVSA7Vtc','授業中'),
+        createData(9,'漢文','国語', 'https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
+        createData(10,'道徳','道徳','https://youtu.be/G9JlVSA7Vtc','授業中'),
+        createData(11,'生物基礎', '理科','https://youtu.be/G9JlVSA7Vtc','授業中'),
+        createData(12,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業終了'),
+        createData(13,'数1A','数学','https://youtu.be/G9JlVSA7Vtc5','授業中'),
+        createData(14,'基礎英語','英語','https://youtu.be/G9JlVSA7Vtc','授業中'),
+        createData(15,'漢文','国語', 'https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
+        createData(16,'道徳','道徳','https://youtu.be/G9JlVSA7Vtc','授業前'),
+        createData(17,'生物基礎', '理科','https://youtu.be/G9JlVSA7Vtc','授業中'),
+        createData(18,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
+        createData(19,'数1A','数学','https://youtu.be/G9JlVSA7Vtc','授業中'),
+        createData(20,'基礎英語','英語','https://youtu.be/G9JlVSA7Vtc','授業中'),
+        createData(21,'漢文','国語', 'https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
+        createData(22,'道徳','道徳','https://youtu.be/G9JlVSA7Vtc','授業中'),
+        createData(23,'生物基礎', '理科','https://youtu.be/G9JlVSA7Vtc','授業中'),
+        createData(24,'地理', '社会','https://youtu.be/G9JlVSA7Vtc' ,'授業中'),
+      ];
+
     return(
       <div>
       <Link to="/ChildLogin"><Typography variant="h6" className={classes.title} style={{margin:'auto',width:'250%',fontSize: "18px"}}>
@@ -532,10 +601,12 @@ class About extends React.Component {
         <CssBaseline/><Container><Button variant="contained" style={{margin:'auto',width:'100%',fontSize: "40px"}}>
 
          <h0>授業履修状況</h0></Button></Container>
-          <CssBaseline/><Container><EnhancedTable/></Container>
+          <CssBaseline/>
+          <Container>
+              <EnhancedTable/>
+            </Container>
       </div>
       )
   }
-}
 
-export default withRouter(About);
+export default ChildPage;

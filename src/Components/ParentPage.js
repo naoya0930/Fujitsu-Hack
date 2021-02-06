@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { getInitialState, useEffect, useState } from 'react'
 import Button from '@material-ui/core/Button';
 import Createicon from '@material-ui/icons/Create';
 import FormControl from '@material-ui/core/FormControl';
@@ -7,13 +7,16 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
+import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import ParentLogin from './ParentLogin';
 import {PieChart, Pie, Cell} from 'recharts';
+
+import { firestore } from '../lib/firebase.js';
+import { assign } from 'lodash';
 
 import { firestorage } from '../lib/firebase.js';
 
@@ -82,82 +85,118 @@ var styles = ({
   },
 });
 
+const ParentPage =(props)=> {
+    //TODO: undefined のときの処理
+    const [childid,setChildid]=useState('user1');
+        /*=useState(typeof props.location.state.user_id);*/
+    const [userId, setUserId]=useState('');
+    const [userName, setUserName]=useState('');
+    const [userLectures, setUserLectures]=useState([]);
+    const [userEndLecture, setUserEndLecture]=useState([]);
+    const [userNowLecture, setUserNowLecture]=useState([]);
+    const [userFutureLecture, setUserFutureLecture]=useState([]);
 
-function DrawGraph(data, colors){
-  let sum = 0;
-  data.map((entry, index) => {
-    sum += entry.value;
-  })
 
-  return (
-    <PieChart width={250} height={250}>
-      {/*}<text x={"50%"} y={"50%"} textAnchor="middle">{"50%"}</text>{/**/}
+    const colors = ["#00FF00", "#0000FF"];
 
-      <text  x={"50%"} y={"52%"} fontSize={20} fontwewight={600} textAnchor="middle">
-      {Math.round(100*data[0].value/sum)} %
-      </text>
-      <Pie data={data}
-       cx="50%" cy="50%"
-       innerRadius={45}
-       outerRadius={80}
-       activeIndex={0}
-       startAngle={90}
-       endAngle={90-360}
-       >
-        {
-          data.map((entry, index) => (
-            <Cell key={entry.name} fill={colors[index]} label={{position: 'inside'}} />
-          ))
-        }
-      </Pie>
-    </PieChart>
-  );
-};
+    const Concentration_Time = [{value:400}, {value:300}]
+    const Gaze_Time = [{value:200}, {value:500}]
+    const Active_Time = [{value:500}, {value:200}]
 
-function requestChildImage(){
-  var storageRef = firestorage.ref();
-  var img = document.getElementById('childimage');
-  img.hidden = !img.hidden;
-
-  storageRef.child('mountains.jpg').getDownloadURL().then(function(url){
-    img.src = url;
-  }).catch( function (error) {
-    console.log("Firestorage Image GET and Show : " + error.message)
-    //強制非表示
-    img.hidden = false;
-    img.src = "";
-  }); 
-}
-
-class About extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      names2:null,
-      childname:"",
-      Concentration_Time : [{value: 400},{value: 300}],
-      Gaze_Time : [{value: 200},{value: 500}],
-      Active_Time : [{value: 500},{value: 200}],
-    }
-  }
-
-  chialdname_chane = (event) => {
-    this.setState({childname : event.target.value})
-
-    //子供が変わったときのグラフ変更デモ
-    this.setState({
-      Concentration_Time : this.state.Gaze_Time,
-      Gaze_Time : this.state.Concentration_Time
-    })
-  }
-
-  render(){
+    useEffect(() => {
+        firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',childid).get().then((d)=>{
+            //何故かasyncが必須。
+            let dx=d.docs.map(item=>item.data());
+            dx.map(element=>{
+                //console.log(childid);
+                //console.log(element.user_id);
+                setUserId(element.user_id);
+                setUserName(element.user_name);
+                //const data = element.lectures.map((item)=>{item.data()});
+                //setUserLectures(data);
+            });
+            d.docs.forEach(item=>item.ref.collection('lectures').onSnapshot((coll)=>{
+                let data=coll.docs.map(item=>item.data());
+                //console.log(data);
+                //終わった授業などを仕分け
+                let x=[];
+                let y=[];
+                let z=[];
+                data.forEach((item)=>{
+                    if(item.lecture_status==='0'){
+                        //今受けている
+                        x.push(item);
+                        //setUserEndLecture(x);
+                    }else if(item.lecture_status==='1'){
+                        //未来の授業
+                        y.push(item);
+                        //setUserNowLecture(userNowLecture.push(item.data()));
+                    }else{
+                        //過去の授業
+                        z.push(item);
+                        //setUserFutureLecture(userFutureLecture.push(item.data()));
+                    }
+                })
+                setUserEndLecture(z);
+                setUserNowLecture(x);
+                setUserFutureLecture(y);
+                setUserLectures(data);　//全部のデータ入ってる
+            }));
+        });
+    }, []);
     
+    function DrawGraph(data, colors){
+      let sum = 0;
+      data.map((entry, index) => {
+        sum += entry.value;
+      })
 
-    const colors = ["#00FF00", "#0000FF"]
+      return (
+        <PieChart width={250} height={250}>
+          {/*}<text x={"50%"} y={"50%"} textAnchor="middle">{"50%"}</text>{/**/}
+
+          <text  x={"50%"} y={"52%"} fontSize={20} fontwewight={600} textAnchor="middle">
+          {Math.round(100*data[0].value/sum)} %
+          </text>
+          <Pie data={data}
+          cx="50%" cy="50%"
+          innerRadius={45}
+          outerRadius={80}
+          activeIndex={0}
+          startAngle={90}
+          endAngle={90-360}
+          >
+            {
+              data.map((entry, index) => (
+                <Cell key={entry.name} fill={colors[index]} label={{position: 'inside'}} />
+              ))
+            }
+          </Pie>
+        </PieChart>
+      );
+    };
+
+    function chialdname_change(event){
+      var new_child = event.target.value;
+    };
+
+    function requestChildImage(){
+      var storageRef = firestorage.ref();
+      var img = document.getElementById('childimage');
+      img.hidden = !img.hidden;
+      storageRef.child('mountains.jpg').getDownloadURL().then(function(url){
+        img.src = url;
+      }).catch( function (error) {
+        console.log("Firestorage Image GET and Show : " + error.message)
+        //強制非表示
+        img.hidden = false;
+        img.src = "";
+      }); 
+    };
 
     return(
       <body>
+          <h1>{userName}さんのページです</h1>
       <div style={styles.div}>
       <Link to="/ParentLogin"><Typography variant="h6" style={{margin:'auto',width:'250%',fontSize: "18px"}}>
         ログインページにもどる
@@ -165,18 +204,21 @@ class About extends React.Component {
         <br/>
         <FormControl variant="filled" style={styles.formControl}>
           <InputLabel id="child-select-label">名前</InputLabel>
-          <Select
-            labelId="child-select-label"
-            id="child-select"
-            value={this.state.childname}
-            variant="filled"
-            style={styles.formControl}
-            onChange={this.chialdname_chane}
-          >
-            <MenuItem value={10}>Ten</MenuItem>
-            <MenuItem value={20}>Twenty</MenuItem>
-            <MenuItem value={30}>Thirty</MenuItem>
-          </Select>
+            <Select
+              labelId="child-select-label"
+              id="child-select"
+              value={""}
+              variant="filled"
+              style={styles.formControl}
+              onChange={chialdname_change}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value={10}>Ten</MenuItem>
+              <MenuItem value={20}>Twenty</MenuItem>
+              <MenuItem value={30}>Thirty</MenuItem>
+            </Select>
         </FormControl>
         <Button class="alert alert-danger" style={styles.status} onClick={requestChildImage}>
           <h2 style={styles.statusText}><Createicon/>授業中</h2>
@@ -191,17 +233,19 @@ class About extends React.Component {
         </Box>
         */}
 
-        <Card variant="elevation" style={styles.mainCard}>
+        <Card variant="elevation" color="#000000" style={styles.mainCard}>
           <CardContent >
             <Typography color="textSecondary" gutterBottom>
               授業中の科目
             </Typography>
+            {userNowLecture.map((x)=>
             <p style={styles.classNow}>
               <Typography style={styles.classText} variant="h4" component="h2">
-              数学
+                  {x.lecture_name}
               </Typography>
-              <Typography style={styles.classTime}>10:20~<br/>11:50</Typography>
+              <Typography style={styles.classTime}>aaa~aaa<br/></Typography>
             </p>
+            )}
           </CardContent>
         </Card>
         <Card variant="elevation" color="#000000" style={styles.mainCard}>
@@ -209,6 +253,7 @@ class About extends React.Component {
             <Typography color="textSecondary" gutterBottom>
               これまで受けた授業
             </Typography>
+            {//userEndLecture.map((x)=>{
             <p style={styles.classNow}>
               <Card variant="elevation" color="#000000" style={styles.classPast}>
                 <CardContent >
@@ -235,6 +280,8 @@ class About extends React.Component {
                 </CardContent>
               </Card>
             </p>
+            //})
+        }
           </CardContent>
         </Card>
 
@@ -250,7 +297,7 @@ class About extends React.Component {
                 <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
                   集中度
                 </Typography>
-                {DrawGraph(this.state.Concentration_Time, colors)}
+                {DrawGraph(Concentration_Time, colors)}
               </CardContent>
             </Card>
             <Card variant="elevation" color="#000000" style={styles.classPast}>
@@ -258,7 +305,7 @@ class About extends React.Component {
                 <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
                 注視度
                 </Typography>
-                {DrawGraph(this.state.Gaze_Time, colors)}
+                {DrawGraph(Gaze_Time, colors)}
               </CardContent>
             </Card>
             <Card variant="elevation" color="#000000" style={styles.classPast}>
@@ -266,7 +313,7 @@ class About extends React.Component {
                 <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
                 アクティブ度
                 </Typography>
-                {DrawGraph(this.state.Active_Time, colors)}
+                {DrawGraph(Active_Time, colors)}
               </CardContent>
             </Card>
           </CardContent>
@@ -274,7 +321,6 @@ class About extends React.Component {
       </div>
       </body>
     )
-  }
 }
 
-export default About;
+export default ParentPage;
