@@ -6,6 +6,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import GridList from '@material-ui/core/GridList';
 import Card from '@material-ui/core/Card';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
@@ -31,6 +32,11 @@ var styles = ({
     width: '100%',
     //minWidth: 120,
   },
+  GridList: {
+    flexWrap: 'nowrap',
+    // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
+    transform: 'translateZ(1)',
+  },
   selectEmpty: {
     //marginTop: theme.spacing(2),
   },
@@ -51,16 +57,16 @@ var styles = ({
   classNow:{
     marginTop: 5,
     marginBottom: 5,
-    borderWidth: 3,
     borderColor: "#00A0A0",
     display: 'flex',
     alignItems: "center",
+    width: "auto",
   },
   classText:{
     fontWeight: 600,
     marginLeft: 10,
     textAlign:'left',
-    marginRight: 30,
+    "white-space": 'nowrap',
   },
   classTime:{
     fontWeight: 600,
@@ -76,12 +82,24 @@ var styles = ({
     alignItems: "center",
     minWidth: 150,
   },
+  statisticsGrid:{
+    alignItems: "center",
+    height: "100%",
+  },
+  statisticsP:{
+    marginTop: 5,
+    marginBottom: 5,
+    borderColor: "#00A0A0",
+    alignItems: "center",
+    display: "flex",
+    "flex-wrap": "wrap",
+  },
   statisticsCard:{
     marginBottom: 5,
     borderWidth: 3,
     borderColor: "#00A0A0",
-    display: 'flex',
     alignItems: "center",
+    display: 'flex',
   },
 });
 
@@ -180,6 +198,17 @@ const ParentPage =(props)=> {
       var new_child = event.target.value;
     };
 
+    function put_Time(time){
+      time = time.toDate();
+      
+      const formatter = new Intl.NumberFormat('ja', {
+        minimumIntegerDigits: 2, 
+        useGrouping: false
+      });
+
+      return ( <span>{time.getHours()}:{formatter.format(time.getMinutes())}</span> );
+    }
+
     function requestChildImage(){
       var storageRef = firestorage.ref();
       var img = document.getElementById('childimage');
@@ -192,11 +221,44 @@ const ParentPage =(props)=> {
         img.hidden = false;
         img.src = "";
       }); 
-    };
+    }
+
+    function LectureCard(item, cardstyle, view_concentrate=true){
+
+      var concentrate_rate = item.user_concentration
+
+      return (
+        <Card variant="elevation" color="#000000" style={cardstyle}>
+          <CardContent >
+            <Typography style={styles.classText} variant="h4" component="h2">
+            {item.lecture_name}
+            </Typography>
+            <Typography style={styles.classTime}>
+              {put_Time(item.lecture_start_at)}~{put_Time(item.lecture_end_at)}</Typography>
+              {function (){
+                  console.log(view_concentrate)
+                  if(view_concentrate){
+                    return (
+                    <p>
+                      <Typography display="inline">集中度：</Typography>
+                      <Typography style={styles.classTime} display="inline">{concentrate_rate}%</Typography>
+                    </p>
+                    );
+                  }else{
+                    return (
+                      <p></p>
+                    );
+                  }
+                }()
+              }
+          </CardContent>
+        </Card>
+      );
+    }
 
     return(
       <body>
-          <h1>{userName}さんのページです</h1>
+          {/*<h1>{userName}さんのページです</h1>*/}
       <div style={styles.div}>
       <Link to="/ParentLogin"><Typography variant="h6" style={{margin:'auto',width:'250%',fontSize: "18px"}}>
         ログインページにもどる
@@ -207,17 +269,14 @@ const ParentPage =(props)=> {
             <Select
               labelId="child-select-label"
               id="child-select"
-              value={""}
+              value={childid}
               variant="filled"
               style={styles.formControl}
               onChange={chialdname_change}
             >
-              <MenuItem value="">
-                <em>None</em>
+              <MenuItem value={childid}>
+                <em>{userName}</em>
               </MenuItem>
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
             </Select>
         </FormControl>
         <Button class="alert alert-danger" style={styles.status} onClick={requestChildImage}>
@@ -240,10 +299,7 @@ const ParentPage =(props)=> {
             </Typography>
             {userNowLecture.map((x)=>
             <p style={styles.classNow}>
-              <Typography style={styles.classText} variant="h4" component="h2">
-                  {x.lecture_name}
-              </Typography>
-              <Typography style={styles.classTime}>aaa~aaa<br/></Typography>
+              {LectureCard(x, styles.classText, false)}
             </p>
             )}
           </CardContent>
@@ -253,35 +309,14 @@ const ParentPage =(props)=> {
             <Typography color="textSecondary" gutterBottom>
               これまで受けた授業
             </Typography>
-            {//userEndLecture.map((x)=>{
-            <p style={styles.classNow}>
-              <Card variant="elevation" color="#000000" style={styles.classPast}>
-                <CardContent >
-                  <Typography style={styles.classText} variant="h4" component="h2">
-                  英語
-                  </Typography>
-                  <Typography style={styles.classTime}>10:20~11:50</Typography>
-                  <p>
-                    <Typography display="inline">集中度：</Typography>
-                    <Typography style={styles.classTime} display="inline">75%</Typography>
-                  </p>
-                </CardContent>
-              </Card>
-              <Card variant="elevation" color="#000000" style={styles.classPast}>
-                <CardContent >
-                  <Typography style={styles.classText} variant="h4" component="h2">
-                  国語
-                  </Typography>
-                  <Typography style={styles.classTime}>10:20~11:50</Typography>
-                  <p>
-                    <Typography display="inline">集中度：</Typography>
-                    <Typography style={styles.classTime} display="inline">75%</Typography>
-                  </p>
-                </CardContent>
-              </Card>
-            </p>
-            //})
-        }
+            <GridList styles={styles.GridList} cols={1}>
+              <p style={styles.classNow}>
+                {userEndLecture.map((item)=>{
+                  return LectureCard(item, styles.classPast);
+                })
+                }
+              </p>
+            </GridList>
           </CardContent>
         </Card>
 
@@ -291,31 +326,35 @@ const ParentPage =(props)=> {
               統計
             </Typography>
           </CardContent>
+          
           <CardContent style={styles.statisticsCard}>
-            <Card variant="elevation" color="#000000" style={styles.classPast}>
-              <CardContent >
-                <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
-                  集中度
-                </Typography>
-                {DrawGraph(Concentration_Time, colors)}
-              </CardContent>
+            {/*<GridList styles={styles.statisticsGrid} cols={3}>*/}
+            <p style={styles.statisticsP}>
+              <Card variant="elevation" color="#000000" style={styles.classPast}>
+                <CardContent >
+                  <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
+                    集中度
+                  </Typography>
+                  {DrawGraph(Concentration_Time, colors)}
+                </CardContent>
+              </Card>
+              <Card variant="elevation" color="#000000" style={styles.classPast}>
+                <CardContent >
+                  <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
+                  注視度
+                  </Typography>
+                  {DrawGraph(Gaze_Time, colors)}
+                </CardContent>
+              </Card>
+              <Card variant="elevation" color="#000000" style={styles.classPast}>
+                <CardContent >
+                  <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
+                  アクティブ度
+                  </Typography>
+                  {DrawGraph(Active_Time, colors)}
+                </CardContent>
             </Card>
-            <Card variant="elevation" color="#000000" style={styles.classPast}>
-              <CardContent >
-                <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
-                注視度
-                </Typography>
-                {DrawGraph(Gaze_Time, colors)}
-              </CardContent>
-            </Card>
-            <Card variant="elevation" color="#000000" style={styles.classPast}>
-              <CardContent >
-                <Typography style={styles.classText} textAlign='center' variant="h5" component="h2">
-                アクティブ度
-                </Typography>
-                {DrawGraph(Active_Time, colors)}
-              </CardContent>
-            </Card>
+            </p>
           </CardContent>
         </Card>
       </div>
