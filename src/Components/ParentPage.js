@@ -251,6 +251,8 @@ const ParentPage =(props)=> {
 
       var concentrate_rate = item.user_concentration
       var activation_rate = item.user_activation
+      var look_count = item.look_count
+      var capture_count = item.capture_count
 
       return (
         <Card variant="elevation" color="#000000" style={cardstyle}>
@@ -280,7 +282,7 @@ const ParentPage =(props)=> {
                     if(view_concentrate){
                       return (
                       <p>
-                      <Typography display="inline">アクティブ率(アクティブだった時間/ページを開いていた時間)：</Typography>
+                      <Typography display="inline">ページアクティブ率:</Typography>
                       <Typography style={styles.classTime} display="inline">{activation_rate}%</Typography>
                       </p>
                       );
