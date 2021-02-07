@@ -66,7 +66,9 @@ const Home=(props)=>{
                     <Button variant="contained" color="primary" onClick={loginCheck}>
                         教員用サービスはこちら
                     </Button>
+                    
                 </Grid>
+                <h1>___</h1>
             </Grid>
         </div>
         </div>
