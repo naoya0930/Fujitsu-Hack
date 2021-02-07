@@ -115,6 +115,7 @@ const ParentPage =(props)=> {
     const [userFutureLecture, setUserFutureLecture]=useState([]);
     const [title,settitle]=useState([]);
     const [options,setoptions]=useState([]);
+    const [lesson_status,setlesson_status]=useState([]);
 
     const colors = ["#00FF00", "#0000FF"];
 
@@ -141,14 +142,14 @@ const ParentPage =(props)=> {
                 let x=[];
                 let y=[];
                 let z=[];
+                setlesson_status('休憩中')
+
+
                 data.forEach((item)=>{
                     if(item.lecture_status==='0'){
                         //今受けている授業中=0
                         x.push(item);
-                        settitle('授業開始')
-                        setoptions({body : 'お子さんの授業が開始しました',
-                        icon : 'アイコン画像のパス',
-                        data : {foo : '任意のデータ'}})
+                        setlesson_status('授業中')
 
                         //setUserEndLecture(x);
                     }else if(item.lecture_status==='1'){
@@ -161,25 +162,37 @@ const ParentPage =(props)=> {
                         //setUserFutureLecture(userFutureLecture.push(item.data()));
                     }
                 })
+                if(lesson_status=='授業中'){
+                settitle('授業開始')
+                console.log('授業開始')
+                setoptions({body : 'お子さんの授業が開始しました',
+                icon : 'アイコン画像のパス',
+                data : {foo : '任意のデータ'}})
+                new Notification(title, options);
+                }
+                else{
+                settitle('授業終了')
+                setoptions({body : 'お子さんの授業が終了しました',
+                icon : 'アイコン画像のパス',
+                data : {foo : '任意のデータ'}})
+                console.log('授業終了')
+                new Notification(title, options);
+                }
                 setUserEndLecture(z);
                 setUserNowLecture(x);
                 setUserFutureLecture(y);
                 setUserLectures(data);
 
-
-                const notification = new Notification(title, options);
-                notification.addEventListener('click', (event) => {
-                console.dir(event);
-                  }, false);　//全部のデータ入ってる
             }));
         });
-    }, []);
 
+    }, []);
     function DrawGraph(data, colors){
       let sum = 0;
       data.map((entry, index) => {
         sum += entry.value;
       })
+
 
       return (
         <PieChart width={250} height={250}>
@@ -237,6 +250,7 @@ const ParentPage =(props)=> {
     function LectureCard(item, cardstyle, view_concentrate=true){
 
       var concentrate_rate = item.user_concentration
+      var activation_rate = item.user_activation
 
       return (
         <Card variant="elevation" color="#000000" style={cardstyle}>
@@ -246,7 +260,7 @@ const ParentPage =(props)=> {
             </Typography>
             <Typography style={styles.classTime}>
               {put_Time(item.lecture_start_at)}~{put_Time(item.lecture_end_at)}</Typography>
-              {function (){
+                {function (){
                   console.log(view_concentrate)
                   if(view_concentrate){
                     return (
@@ -260,13 +274,26 @@ const ParentPage =(props)=> {
                       <p></p>
                     );
                   }
-                }()
-              }
+                }()}
+                {function (){
+                    console.log(view_concentrate)
+                    if(view_concentrate){
+                      return (
+                      <p>
+                      <Typography display="inline">アクティブ率(アクティブだった時間/ページを開いていた時間)：</Typography>
+                      <Typography style={styles.classTime} display="inline">{activation_rate}%</Typography>
+                      </p>
+                      );
+                    }else{
+                      return (
+                        <p></p>
+                      );
+                    }
+                  }()}
           </CardContent>
         </Card>
       );
     }
-
     return(
       <body>
           {/*<h1>{userName}さんのページです</h1>*/}
@@ -291,7 +318,7 @@ const ParentPage =(props)=> {
             </Select>
         </FormControl>
         <Button class="alert alert-danger" style={styles.status} onClick={requestChildImage}>
-          <h2 style={styles.statusText}><Createicon/>授業中</h2>
+          <h2 style={styles.statusText}><Createicon/>{lesson_status}</h2>
         </Button>
         <Card variant="elevation" style={styles.mainCard}>
           <CardMedia component="img" id="childimage" hidden></CardMedia>
