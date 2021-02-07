@@ -67,6 +67,7 @@ const ChildLogin = (props) => {
                 <h3>{roginMsg}</h3>
             </div>
         </form>
+        <br/>
     </div>
   );
 }
