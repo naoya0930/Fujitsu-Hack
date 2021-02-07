@@ -40,15 +40,26 @@ async function setupModel(){
   };
 }
 
+function stopStreamedVideo(videoElem) {
+  let stream = videoElem.srcObject;
+  let tracks = stream.getTracks();
+
+  tracks.forEach(function(track) {
+    track.stop();
+  });
+
+  videoElem.srcObject = null;
+}
+
 class AppMovie extends Component {
   constructor(props) {
     super(props);
     this.u = "https://www.youtube.com/embed/"
     this.full_url = this.u+this.props.location.state.lecture_url.slice(17)+"?autoplay=1&mute=1"
 
-    this.startTime = null
-    this.endTime = null
-    this.elapsedTime = null
+    this.startTime = Date.now();
+    this.endTime = Date.now();
+    this.elapsedTime = 0
     this.state = {
       nowTime: '状態：アクティブかどうか判定します',
       capture_count: 0,
@@ -96,9 +107,13 @@ class AppMovie extends Component {
   componentDidMount(){
     window.addEventListener("focus", this.onFocus,false)
     var snapshotCanvas = document.getElementById('snapshot');
-    
+
     var video = document.getElementById('webcam');
     this.pageStartTime = Date.now()
+
+    firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',this.props.location.state.user_id).get().then((e)=>{
+      e.docs.forEach((r) => r.ref.collection('lectures').where('lecture_id','==',this.props.location.state.lecture_id).get().then((ee)=>{
+        ee.docs.forEach((rr) => rr.ref.update({lecture_status:"0"}))}))})
 
     try{
       navigator.mediaDevices
@@ -142,33 +157,33 @@ class AppMovie extends Component {
     this.startTime = Date.now();
   }
 
-  snapshot(video, canvas, stream){ 
+  snapshot(video, canvas, stream){
     if(!this.useCamera)
       return;
 
-  var ctx =  canvas.getContext('2d'); 
-  canvas.width =video.videoWidth;
-  canvas.height =video.videoHeight;
-  var w = canvas.width;
-  var h = canvas.height; 
-  ctx.drawImage(video, 0, 0, w, h);
+    var ctx =  canvas.getContext('2d'); 
+    canvas.width =video.videoWidth;
+    canvas.height =video.videoHeight;
+    var w = canvas.width;
+    var h = canvas.height; 
+    ctx.drawImage(video, 0, 0, w, h);
 
-  console.log(w,h);
+    console.log(w,h);
 
-  // Create a root reference
-  var storageRef = firestorage.ref();
-  // Create a reference to 'mountains.jpg'
-  var mountainsRef = storageRef.child('mountains.jpg');
+    // Create a root reference
+    var storageRef = firestorage.ref();
+    // Create a reference to 'mountains.jpg'
+    var mountainsRef = storageRef.child(this.props.location.state.user_id+'.jpg');
 
-  canvas.toBlob(function(blob) {
-    var img = document.createElement('image');
-    img.srcObject = stream;
-    
-    mountainsRef.put(blob).then(function(img) {
-      console.log('Uploaded a blob or file!');
-    });
-  }, 'image/jpeg', 0.95); 
-}
+    canvas.toBlob(function(blob) {
+      var img = document.createElement('image');
+      img.srcObject = stream;
+      
+      mountainsRef.put(blob).then(function(img) {
+        console.log('Uploaded a blob or file!');
+      });
+    }, 'image/jpeg', 0.95); 
+  }
 
   onTimerSnspshot(video, canvas, stream){
     if(!this.useCamera)
@@ -200,9 +215,9 @@ class AppMovie extends Component {
           height: h,
         })
 
-        
+
         var landmarks = resizedDetection.landmarks;
-        
+
         //ランドマークのカメラ位置を取得
         var ns = landmarks.getNose()[3];        //鼻
         var lo = landmarks.getJawOutline()[0];  //左頬
@@ -248,14 +263,16 @@ class AppMovie extends Component {
         body : 'お子さんが授業「'+name+'」を終了をしました',
         icon : 'アイコン画像のパス',
         data : {foo : '任意のデータ'}
-        };
+      };
       const notification = new Notification(title, options);
       notification.addEventListener('click', (event) => {console.dir(event);}, false);
+
       this.pageEndTime = Date.now()
       this.pageElapsedTime = this.pageEndTime-this.pageStartTime
-      this.activation = 1-(this.elapsedTime/this.pageElapsedTime)
+      this.activation = Math.round((1-(this.elapsedTime/this.pageElapsedTime))*100)
       console.log(this.props.location.state.user_id)
-      var user_concentration_rate = 100*(this.activation)
+
+      var user_concentration_rate = this.activation
       if(this.state.capture_count > 10)
         user_concentration_rate = 100*(this.activation + (this.state.look_count/this.state.capture_count))/2.0
       firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',this.props.location.state.user_id).get().then((e)=>{
@@ -270,8 +287,10 @@ class AppMovie extends Component {
       })
       )});
 
+      //カメラ停止
+      var video = document.getElementById('webcam');
+      stopStreamedVideo(video);
   };
-
 
 
     return (

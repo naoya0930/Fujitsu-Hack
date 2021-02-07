@@ -12,7 +12,8 @@ import SchoolIcon from '@material-ui/icons/School';
 import Grid from '@material-ui/core/Grid';
 import { createStyles, lighten, makeStyles, Theme } from '@material-ui/core/styles';
 
-const Home=(props)=>{
+
+const Home = (props) => {
     const [styles,setStyles]=useState(true);
     const loginCheck=()=>{
         setStyles(false);
