@@ -42,6 +42,8 @@ async function setupModel(){
 
 function stopStreamedVideo(videoElem) {
   let stream = videoElem.srcObject;
+  if(!stream)
+    return;
   let tracks = stream.getTracks();
 
   tracks.forEach(function(track) {
@@ -271,10 +273,11 @@ class AppMovie extends Component {
       this.pageElapsedTime = this.pageEndTime-this.pageStartTime
       this.activation = Math.round((1-(this.elapsedTime/this.pageElapsedTime))*100)
       console.log(this.props.location.state.user_id)
+      this.gaze_rate = (this.state.look_count/this.state.capture_count)*100
 
       var user_concentration_rate = this.activation
       if(this.state.capture_count > 10)
-        user_concentration_rate = 100*(this.activation + (this.state.look_count/this.state.capture_count))/2.0
+        user_concentration_rate = 100*(this.activation + this.gaze_rate)/2.0
       firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',this.props.location.state.user_id).get().then((e)=>{
         e.docs.forEach((r) => r.ref.collection('lectures').where('lecture_id','==',this.props.location.state.lecture_id).get().then((ee)=>{
           ee.docs.forEach((rr) => rr.ref.update({

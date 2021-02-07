@@ -1,6 +1,7 @@
 import React, { getInitialState, useEffect, useState } from 'react'
 import Button from '@material-ui/core/Button';
 import Createicon from '@material-ui/icons/Create';
+import FreeBreakfastIcon from '@material-ui/icons/FreeBreakfast';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
@@ -33,9 +34,11 @@ var styles = ({
     //minWidth: 120,
   },
   GridList: {
-    flexWrap: 'nowrap',
+    display: 'flex',
+    "flex-wrap": 'nowrap',
     // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
     transform: 'translateZ(1)',
+    height: 'auto',
   },
   selectEmpty: {
     //marginTop: theme.spacing(2),
@@ -52,11 +55,11 @@ var styles = ({
   },
   mainCard:{
     marginTop: 5,
-    marginBottom: 5,
+    marginBottom: 0,
   },
   classNow:{
     marginTop: 5,
-    marginBottom: 5,
+    //marginBottom: 5,
     borderColor: "#00A0A0",
     display: 'flex',
     alignItems: "center",
@@ -74,13 +77,12 @@ var styles = ({
     minWidth: 50,
   },
   classPast:{
-    borderWidth: 3,
     marginLeft: 2,
     marginRight: 2,
     borderColor: "#00A0A0",
     display: 'flex',
     alignItems: "center",
-    minWidth: 150,
+    minWidth: 220,
   },
   statisticsGrid:{
     alignItems: "center",
@@ -116,12 +118,12 @@ const ParentPage =(props)=> {
     const [title,settitle]=useState([]);
     const [options,setoptions]=useState([]);
     const [lesson_status,setlesson_status]=useState([]);
-
     const colors = ["#00FF00", "#0000FF"];
 
-    const Concentration_Time = [{value:400}, {value:300}]
-    const Gaze_Time = [{value:200}, {value:500}]
-    const Active_Time = [{value:500}, {value:200}]
+    const [Concentration_Time,set_Concentration]=useState([{value:400}, {value:300}]);
+    const [Gaze_Time,set_Gaze]=useState([{value:200}, {value:500}]);
+    const [Active_Time,set_Active]=useState([{value:500}, {value:200}]);
+
 
     useEffect(() => {
         firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',childid).get().then((d)=>{
@@ -145,6 +147,11 @@ const ParentPage =(props)=> {
                 setlesson_status('休憩中')
 
 
+                let concentrate_sum = 0;
+                let active_sum = 0;
+                let gaze_sum = 0;
+                let item_lectured_count = 0;
+                let gaze_lectured_count = 0;
                 data.forEach((item)=>{
                     if(item.lecture_status==='0'){
                         //今受けている授業中=0
@@ -159,6 +166,14 @@ const ParentPage =(props)=> {
                     }else{
                         //過去の授業2
                         z.push(item);
+                        concentrate_sum += item.user_concentration;
+                        active_sum += item.user_activation;
+                        if(item.capture_count>0){
+                          gaze_sum += item.look_count/item.capture_count;
+                          gaze_lectured_count++;
+                        }
+                        item_lectured_count++;
+                        //console.log(item.user_concentration, item.user_activation, active_sum)
                         //setUserFutureLecture(userFutureLecture.push(item.data()));
                     }
                 })
@@ -182,7 +197,11 @@ const ParentPage =(props)=> {
                 setUserNowLecture(x);
                 setUserFutureLecture(y);
                 setUserLectures(data);
-
+                
+                if (gaze_lectured_count==0) gaze_lectured_count=1;
+                set_Concentration([{value: concentrate_sum/item_lectured_count},{value: 100-(concentrate_sum/item_lectured_count)}])
+                set_Active([{value: active_sum/item_lectured_count},{value: 100-(active_sum/item_lectured_count)}])
+                set_Gaze([{value: gaze_sum/gaze_lectured_count},{value: 1-(gaze_sum/gaze_lectured_count)}])
             }));
         });
 
@@ -253,6 +272,8 @@ const ParentPage =(props)=> {
       var activation_rate = item.user_activation
       var look_count = item.look_count
       var capture_count = item.capture_count
+      if(capture_count==0)capture_count=1
+      var look_rate=look_count/capture_count;
 
       return (
         <Card variant="elevation" color="#000000" style={cardstyle}>
@@ -263,7 +284,6 @@ const ParentPage =(props)=> {
             <Typography style={styles.classTime}>
               {put_Time(item.lecture_start_at)}~{put_Time(item.lecture_end_at)}</Typography>
                 {function (){
-                  console.log(view_concentrate)
                   if(view_concentrate){
                     return (
                     <p>
@@ -278,13 +298,17 @@ const ParentPage =(props)=> {
                   }
                 }()}
                 {function (){
-                    console.log(view_concentrate)
                     if(view_concentrate){
                       return (
-                      <p>
-                      <Typography display="inline">ページアクティブ率:</Typography>
-                      <Typography style={styles.classTime} display="inline">{activation_rate}%</Typography>
-                      </p>
+                      <span>
+                        <p>
+                        <Typography display="inline">ページアクティブ率:</Typography>
+                        <Typography style={styles.classTime} display="inline">{activation_rate}%</Typography>
+                        <br/>
+                        <Typography display="inline">注視度:</Typography>
+                        <Typography style={styles.classTime} display="inline">{Math.floor(look_rate*100)}%</Typography>
+                        </p>
+                      </span>
                       );
                     }else{
                       return (
@@ -296,6 +320,23 @@ const ParentPage =(props)=> {
         </Card>
       );
     }
+
+    function DrawLectureStatus(status_text){
+      if(status_text == "授業中"){
+        return (
+          <Button class="alert alert-danger" style={styles.status} onClick={requestChildImage}>
+            <h2 style={styles.statusText}><Createicon/>{status_text}</h2>
+          </Button>
+        )
+      }else{
+        return (
+          <Button class="alert alert-success" style={styles.status} onClick={requestChildImage}>
+            <h2 style={styles.statusText}><FreeBreakfastIcon/>{status_text}</h2>
+          </Button>
+        )
+      }
+    }
+
     return(
       <body>
           {/*<h1>{userName}さんのページです</h1>*/}
@@ -319,9 +360,7 @@ const ParentPage =(props)=> {
               </MenuItem>
             </Select>
         </FormControl>
-        <Button class="alert alert-danger" style={styles.status} onClick={requestChildImage}>
-          <h2 style={styles.statusText}><Createicon/>{lesson_status}</h2>
-        </Button>
+        {DrawLectureStatus(lesson_status)}
         <Card variant="elevation" style={styles.mainCard}>
           <CardMedia component="img" id="childimage" hidden></CardMedia>
         </Card>
@@ -342,14 +381,25 @@ const ParentPage =(props)=> {
               {LectureCard(x, styles.classText, false)}
             </p>
             )}
+            {function(){
+              if(userNowLecture.length==0){
+                return (
+                <p style={styles.classNow}>
+                <Typography gutterBottom>
+                現在受けている授業はありません
+                </Typography>
+                </p>
+                )
+              }
+            }()}
           </CardContent>
         </Card>
-        <Card variant="elevation" color="#000000" style={styles.mainCard}>
+        <Card variant="elevation" style={styles.mainCard}>
           <CardContent >
             <Typography color="textSecondary" gutterBottom>
               これまで受けた授業
             </Typography>
-            <GridList styles={styles.GridList} cols={1}>
+            <GridList styles={styles.GridList} cols={2.5}>
               <p style={styles.classNow}>
                 {userEndLecture.map((item)=>{
                   return LectureCard(item, styles.classPast);
