@@ -107,9 +107,13 @@ class AppMovie extends Component {
   componentDidMount(){
     window.addEventListener("focus", this.onFocus,false)
     var snapshotCanvas = document.getElementById('snapshot');
-    
+
     var video = document.getElementById('webcam');
     this.pageStartTime = Date.now()
+
+    firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',this.props.location.state.user_id).get().then((e)=>{
+      e.docs.forEach((r) => r.ref.collection('lectures').where('lecture_id','==',this.props.location.state.lecture_id).get().then((ee)=>{
+        ee.docs.forEach((rr) => rr.ref.update({lecture_status:"0"}))}))})
 
     try{
       navigator.mediaDevices
@@ -153,7 +157,7 @@ class AppMovie extends Component {
     this.startTime = Date.now();
   }
 
-  snapshot(video, canvas, stream){ 
+  snapshot(video, canvas, stream){
     if(!this.useCamera)
       return;
 
@@ -211,9 +215,9 @@ class AppMovie extends Component {
           height: h,
         })
 
-        
+
         var landmarks = resizedDetection.landmarks;
-        
+
         //ランドマークのカメラ位置を取得
         var ns = landmarks.getNose()[3];        //鼻
         var lo = landmarks.getJawOutline()[0];  //左頬
@@ -262,11 +266,13 @@ class AppMovie extends Component {
       };
       const notification = new Notification(title, options);
       notification.addEventListener('click', (event) => {console.dir(event);}, false);
+
       this.pageEndTime = Date.now()
       this.pageElapsedTime = this.pageEndTime-this.pageStartTime
-      this.activation = 1-(this.elapsedTime/this.pageElapsedTime)
+      this.activation = Math.round((1-(this.elapsedTime/this.pageElapsedTime))*100)
       console.log(this.props.location.state.user_id)
-      var user_concentration_rate = 100*(this.activation)
+
+      var user_concentration_rate = this.activation
       if(this.state.capture_count > 10)
         user_concentration_rate = 100*(this.activation + (this.state.look_count/this.state.capture_count))/2.0
       firestore.collection('HackApp').doc('Users').collection('Users').where('user_id','==',this.props.location.state.user_id).get().then((e)=>{
@@ -285,7 +291,6 @@ class AppMovie extends Component {
       var video = document.getElementById('webcam');
       stopStreamedVideo(video);
   };
-
 
 
     return (

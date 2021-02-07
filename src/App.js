@@ -34,7 +34,7 @@ const App = () => {
         <Router>
           <div>
             <Navbar /><hr/>
-            <Route path='/' component={Home}/>
+            <Route path='/' exact component={Home}/>
             <Route path='/About' component={About}/>
             <Route path='/ChildPage' component={ChildPage}/>
             <Route path='/ChildLogin' component={ChildLogin}/>
