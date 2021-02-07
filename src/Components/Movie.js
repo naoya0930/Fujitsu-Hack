@@ -57,9 +57,9 @@ class AppMovie extends Component {
     this.u = "https://www.youtube.com/embed/"
     this.full_url = this.u+this.props.location.state.lecture_url.slice(17)+"?autoplay=1&mute=1"
 
-    this.startTime = null
-    this.endTime = null
-    this.elapsedTime = null
+    this.startTime = Date.now();
+    this.endTime = Date.now();
+    this.elapsedTime = 0
     this.state = {
       nowTime: '状態：アクティブかどうか判定します',
       capture_count: 0,
@@ -259,7 +259,7 @@ class AppMovie extends Component {
         body : 'お子さんが授業「'+name+'」を終了をしました',
         icon : 'アイコン画像のパス',
         data : {foo : '任意のデータ'}
-        };
+      };
       const notification = new Notification(title, options);
       notification.addEventListener('click', (event) => {console.dir(event);}, false);
       this.pageEndTime = Date.now()
