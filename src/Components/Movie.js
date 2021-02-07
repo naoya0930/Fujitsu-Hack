@@ -161,29 +161,29 @@ class AppMovie extends Component {
     if(!this.useCamera)
       return;
 
-  var ctx =  canvas.getContext('2d');
-  canvas.width =video.videoWidth;
-  canvas.height =video.videoHeight;
-  var w = canvas.width;
-  var h = canvas.height;
-  ctx.drawImage(video, 0, 0, w, h);
+    var ctx =  canvas.getContext('2d'); 
+    canvas.width =video.videoWidth;
+    canvas.height =video.videoHeight;
+    var w = canvas.width;
+    var h = canvas.height; 
+    ctx.drawImage(video, 0, 0, w, h);
 
-  console.log(w,h);
+    console.log(w,h);
 
-  // Create a root reference
-  var storageRef = firestorage.ref();
-  // Create a reference to 'mountains.jpg'
-  var mountainsRef = storageRef.child('mountains.jpg');
+    // Create a root reference
+    var storageRef = firestorage.ref();
+    // Create a reference to 'mountains.jpg'
+    var mountainsRef = storageRef.child(this.props.location.state.user_id+'.jpg');
 
-  canvas.toBlob(function(blob) {
-    var img = document.createElement('image');
-    img.srcObject = stream;
-
-    mountainsRef.put(blob).then(function(img) {
-      console.log('Uploaded a blob or file!');
-    });
-  }, 'image/jpeg', 0.95);
-}
+    canvas.toBlob(function(blob) {
+      var img = document.createElement('image');
+      img.srcObject = stream;
+      
+      mountainsRef.put(blob).then(function(img) {
+        console.log('Uploaded a blob or file!');
+      });
+    }, 'image/jpeg', 0.95); 
+  }
 
   onTimerSnspshot(video, canvas, stream){
     if(!this.useCamera)

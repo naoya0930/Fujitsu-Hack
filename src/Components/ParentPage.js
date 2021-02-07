@@ -237,7 +237,7 @@ const ParentPage =(props)=> {
       var storageRef = firestorage.ref();
       var img = document.getElementById('childimage');
       img.hidden = !img.hidden;
-      storageRef.child('mountains.jpg').getDownloadURL().then(function(url){
+      storageRef.child(userId+'.jpg').getDownloadURL().then(function(url){
         img.src = url;
       }).catch( function (error) {
         console.log("Firestorage Image GET and Show : " + error.message)
