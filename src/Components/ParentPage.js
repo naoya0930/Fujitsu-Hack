@@ -288,7 +288,7 @@ const ParentPage =(props)=> {
                     return (
                     <p>
                       <Typography display="inline">集中度：</Typography>
-                      <Typography style={styles.classTime} display="inline">{concentrate_rate}%</Typography>
+                      <Typography style={styles.classTime} display="inline">{Math.floor(concentrate_rate)}%</Typography>
                     </p>
                     );
                   }else{
@@ -303,7 +303,7 @@ const ParentPage =(props)=> {
                       <span>
                         <p>
                         <Typography display="inline">ページアクティブ率:</Typography>
-                        <Typography style={styles.classTime} display="inline">{activation_rate}%</Typography>
+                        <Typography style={styles.classTime} display="inline">{Math.floor(activation_rate)}%</Typography>
                         <br/>
                         <Typography display="inline">注視度:</Typography>
                         <Typography style={styles.classTime} display="inline">{Math.floor(look_rate*100)}%</Typography>
