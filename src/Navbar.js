@@ -1,10 +1,12 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-
+import Topbar from '@material-ui/core/Toolbar'
 class Navbar extends React.Component {
   render(){
     return(
-      <div>
+        
+      <Topbar>Welcome to Study-DRUG!!　　　　　*画面がうまく表示できない場合はリロードしてください
+          {/*
         <Link to="/">Home</Link>
         <p/>
         <Link to="/About">About</Link>
@@ -20,8 +22,8 @@ class Navbar extends React.Component {
         <Link to="/TeacherPage">TeacherPage</Link>
         <p/>
         <Link to="/TeacherLogin">TeacherLogin</Link>
-
-      </div>
+          */}
+      </Topbar>
     )
   }
 }
